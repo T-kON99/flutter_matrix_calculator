@@ -1,7 +1,7 @@
 class Matrix {
   int row, col, size;
   List<List<double>> data;
-
+  
   Matrix({this.data}) {
     this.row = this.data.length;
     this.col = this.data[0].length;
@@ -14,7 +14,56 @@ class Matrix {
 
   bool isSquare() => this.row == this.col;
 
+  /// Determinant of a matrix
+  double det() {
+    //  TODO
+    assert(this.isSquare(), 'A non-square matrix has no determinant value');
+    double output = 1;
+    var matGauss = this.gaussElimination();
+    for(int n = 0; n < matGauss.size; n++) {
+      output = output * matGauss.data[n][n];
+    }
+    return output;
+  }
+
+  Matrix gaussElimination() {
+    var out = Matrix(data: this.data);
+    double ratio;
+    for(int j = 0; j < this.col; j++) {
+      for(int i = this.row - 1; i > j; i--) {
+        //  Step 1
+        //  Countermeasure if the current cell is 0, we're going to perform an elementary matrix operation and add the row below
+        //  to current row.
+        if(out.data[i - 1][j] == 0) {
+          for(int n = 0; n < this.col; n++) {
+              out.data[i - 1][n] = out.data[i - 1][n] + out.data[i][n];
+          }
+        }
+
+        //  Step 2
+        //  Get the ratio if applicable (non zero value, otherwise will result in dividing by 0)
+        if(out.data[i - 1][j] != 0) ratio = out.data[i][j] / out.data[i - 1][j];
+        else ratio = 1;
+
+        //  Step 3
+        //  Perform the elementary row operation, in this case substracting the value from row (i)-th with row (i-1)th
+        for(int n = 0; n < this.col; n++) {
+          out.data[i][n] = out.data[i][n] - (ratio * out.data[i - 1][n]);
+        }
+      }
+    }
+    return out;
+  }
+
+  //  TODO?
+  Matrix toRE() {
+    this.data = this.gaussElimination().data;
+    return this;
+  }
+
   Matrix inv() {
+    //  TODO
+    assert(this.isSquare(), 'Can not perform inverse on a non-square matrix');
     var out = Matrix(data: this.data);
     return out;
   }
@@ -52,8 +101,8 @@ class Matrix {
       for(int i = 0; i < result.row; i++) {
         for(int j = 0; j < result.col; j++) {
           result.data[i][j] = 0;
-          for(int k = 0; k < this.col; k++) {
-            result.data[i][j] += this.data[i][k] * other.data[k][j];
+          for(int j = 0; j < this.col; j++) {
+            result.data[i][j] += this.data[i][j] * other.data[j][j];
           }
         }
       }
