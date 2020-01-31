@@ -13,6 +13,19 @@ void main() {
     expect(mat.row, mat.col);
   });
 
+  test('Copying a matrix from another matrix', () {
+    final mat = Matrix(data: [
+      [1, 2],
+      [1, 5]
+    ]);
+    var copy = Matrix.copyFrom(mat);
+    copy.data[0][0] = 2;
+    expect(mat.data, [
+      [1, 2],
+      [1, 5]
+    ]);
+  });
+
   test('Matrix 2x3 Addition', () {
     final matA = Matrix(data: [[1, 5, 3], [3, 6, 1]]);
     final matB = Matrix(data: [[2, 1, 0], [-4, 5, 1]]);
@@ -50,6 +63,38 @@ void main() {
   test('Determinant of a non-square Matrix', () {
     //  TODO
     final mat = Matrix(data: [[1, 3]]);
-    expect(mat.det(), throwsA(isAssertionError));
+    expect(mat.det(), throwsException);
+  });
+
+  test('Reduced Row Echelon Form of a square 2x2 matrix', () {
+    final mat = Matrix(data: [[1, 5], [3, 2]]);
+    expect(mat.toRRE().data, [[1, 0], [0, 1]]);
+  });
+
+  test('Reduced Row Echelon Form of a square 4x5 matrix', () {
+    final mat = Matrix(data: [
+      [1, 5, 7, 0, -5], 
+      [3, 2, 6, 0, -7], 
+      [-1, -3, 0, -7, 9], 
+      [0.5, -3, 0.3, -1.9, 6]
+    ]);
+    print(mat.toRRE().data);
+    expect(mat.toRRE().data, [
+      [1.0, 0.0, 0.0, 0.0, moreOrLessEquals(-4.352112676056337)],
+      [0.0, 1.0, 0.0, 0.0, moreOrLessEquals(-2.892605633802818)],
+      [0.0, 0.0, 1.0, 0.0, moreOrLessEquals(1.9735915492957754)],
+      [0.0, 0.0, 0.0, 1.0, moreOrLessEquals(0.5757042253521134)]
+    ]);
+  });
+
+  test('Inverse of a 2x2 Matrix', () {
+    final mat = Matrix(data: [
+      [1, 4],
+      [2, 3]
+    ]);
+    expect(mat.inv().data, [
+      [moreOrLessEquals(-0.6), moreOrLessEquals(0.8)], 
+      [moreOrLessEquals(0.4), moreOrLessEquals(-0.2)]
+    ]);
   });
 }
