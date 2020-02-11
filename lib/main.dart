@@ -1,68 +1,47 @@
 import 'package:flutter/material.dart';
-import 'package:english_words/english_words.dart';
 import './classes/matrix.dart';
+import './navbar.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(Main());
 
-class MyApp extends StatelessWidget {
+class Main extends StatefulWidget {
+  @override
+  _MainState createState() => _MainState();
+}
+
+class _MainState extends State<Main> {
+  int _curTabIndex = 0;
   @override
   Widget build(BuildContext context) {
-    final test = Matrix(data: [[1, 2], [3, 1]]);
-    final other = Matrix(data: [[3, 2], [2, 4]]);
-    print((test*other).data);
     return MaterialApp(
-      title: 'Welcome to Flutter',
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text('Welcome to Flutter'),
-        ),
-        body: Center(
-          child: RandomWords(),
-        ),
-      ),
-    );
-  }
-}
-
-class RandomWordsState extends State<RandomWords> {
-  final _suggestions = <WordPair>[];
-  final _biggerFont = const TextStyle(fontSize: 18.0);
-
-  Widget _buildSuggestions() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemBuilder: /*1*/ (context, i) {
-        if (i.isOdd) return Divider();
-        final index = i ~/ 2;
-        if (index >= _suggestions.length) {
-          _suggestions.addAll(generateWordPairs().take(10));
-        }
-        return _buildRow(_suggestions[index]);
-      },
-    );
-  }
-
-  Widget _buildRow(WordPair pair) {
-    return ListTile(
-      title: Text(
-        pair.asPascalCase,
-        style: _biggerFont,
-      ),
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
+        home: Scaffold(
       appBar: AppBar(
-        title: Text('Startup Name Generator'),
+        title: Text('Matrix Calculator'),
       ),
-      body: _buildSuggestions(),
-    );
+      body: SafeArea(
+        top: false,
+        child: IndexedStack(
+          index: _curTabIndex,
+          children: Navigations.map<Widget>((NavTab tab) {
+            return TabView(tab: tab);
+          }).toList(),
+        ),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _curTabIndex,
+        items: Navigations.map((NavTab tab) {
+          return BottomNavigationBarItem(
+            icon: Icon(tab.icon),
+            title: Text(tab.title),
+            backgroundColor: tab.color
+          );
+        }).toList(),
+        onTap: (tabIndex) {
+          setState(() {
+            _curTabIndex = tabIndex;
+          });
+        },
+      ),
+    ));
   }
-}
-
-class RandomWords extends StatefulWidget {
-  @override
-  RandomWordsState createState() => RandomWordsState();
 }
