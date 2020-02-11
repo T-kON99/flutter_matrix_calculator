@@ -19,7 +19,7 @@ void main() {
       [1, 5]
     ]);
     var copy = Matrix.copyFrom(mat);
-    copy.data[0][0] = 2;
+    copy = copy * 2;
     expect(mat.data, [
       [1, 2],
       [1, 5]
