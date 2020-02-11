@@ -1,36 +1,44 @@
 class Matrix {
-  int row, col, size;
-  List<List<double>> data;
+  int _row, _col, _size;
+  List<List<double>> _data;
   static const _epsilon = 0.0000000000001;
 
-  Matrix.withSize({this.row, this.col}) {
-    this.data = new List.generate(row, (_) => List(col));
-    this.size = this.row == this.col ? this.row : null;
+  int get row => this._row;
+  int get col => this._col;
+  int get size => this._size;
+  List<List<double>> get data => this._data;
+
+  Matrix.withSize({row, col}) {
+    this._row = row;
+    this._col = col;
+    this._data = new List.generate(_row, (_) => List<double>(_col));
+    this._size = this._row == this._col ? this._row : null;
   }
 
-  Matrix({this.data}) {
-    this.row = this.data.length;
-    this.col = this.data[0].length;
-    this.size = this.row == this.col ? this.row : null;
+  Matrix({List<List<double>> data}) {
+    this._data = data;
+    this._row = this._data.length;
+    this._col = this._data[0].length;
+    this._size = this._row == this._col ? this._row : null;
   }
 
   factory Matrix.copyFrom(Matrix other) {
-    var copy = Matrix.withSize(row: other.row, col: other.col);
-    for(int i = 0; i < copy.row; i++)
-      for(int j = 0; j < copy.col; j++)
-        copy.data[i][j] = other.data[i][j];
+    var copy = Matrix.withSize(row: other._row, col: other._col);
+    for(int i = 0; i < copy._row; i++)
+      for(int j = 0; j < copy._col; j++)
+        copy._data[i][j] = other._data[i][j];
     return copy;
   }
 
-  bool isSquare() => this.row == this.col;
+  bool isSquare() => this._row == this._col;
 
   /// Determinant of a matrix
   double det() {
     if(!this.isSquare()) throw('A non-square matrix has no determinant value');
     double output = 1;
     var matGauss = this.gaussElimination();
-    for (int n = 0; n < matGauss.size; n++) {
-      output = output * matGauss.data[n][n];
+    for (int n = 0; n < matGauss._size; n++) {
+      output = output * matGauss._data[n][n];
     }
     return output;
   }
@@ -39,28 +47,28 @@ class Matrix {
     //  TODO BUG, fix this.data pointing to old value!
     var out = Matrix.copyFrom(this);
     double ratio;
-    for (int j = 0; j < this.col; j++) {
-      for (int i = this.row - 1; i > j; i--) {
+    for (int j = 0; j < this._col; j++) {
+      for (int i = this._row - 1; i > j; i--) {
         //  Step 1
         //  Countermeasure if the current cell is 0, we're going to perform an elementary matrix operation and add the row below
         //  to current row.
-        if (out.data[i - 1][j] == 0) {
-          for (int n = 0; n < this.col; n++) {
-            out.data[i - 1][n] = out.data[i - 1][n] + out.data[i][n];
+        if (out._data[i - 1][j] == 0) {
+          for (int n = 0; n < this._col; n++) {
+            out._data[i - 1][n] = out._data[i - 1][n] + out._data[i][n];
           }
         }
 
         //  Step 2
         //  Get the ratio if applicable (non zero value, otherwise will result in dividing by 0)
-        if (out.data[i - 1][j] != 0)
-          ratio = out.data[i][j] / out.data[i - 1][j];
+        if (out._data[i - 1][j] != 0)
+          ratio = out._data[i][j] / out._data[i - 1][j];
         else
           ratio = 1;
 
         //  Step 3
         //  Perform the elementary row operation, in this case substracting the value from row (i)-th with row (i-1)th
-        for (int n = 0; n < this.col; n++) {
-          out.data[i][n] = out.data[i][n] - (ratio * out.data[i - 1][n]);
+        for (int n = 0; n < this._col; n++) {
+          out._data[i][n] = out._data[i][n] - (ratio * out._data[i - 1][n]);
         }
       }
     }
@@ -69,14 +77,14 @@ class Matrix {
 
   Matrix _normalizeRE() {
     double ratio;
-    for (int i = 0; i < this.row; i++) {
-      for (int j = 0; j < this.col; j++) {
-        if (this.data[i][j].abs() > _epsilon) {
-          ratio = 1 / this.data[i][j];
-          for (int n = 0; n < this.col; n++) {
-            this.data[i][n] *= ratio;
+    for (int i = 0; i < this._row; i++) {
+      for (int j = 0; j < this._col; j++) {
+        if (this._data[i][j].abs() > _epsilon) {
+          ratio = 1 / this._data[i][j];
+          for (int n = 0; n < this._col; n++) {
+            this._data[i][n] *= ratio;
             //Fixes floating point problem. Ex : 0 * -0.333333 returns -0 instead of 0.
-            if (this.data[i][n].abs() < _epsilon) this.data[i][n] = 0;
+            if (this._data[i][n].abs() < _epsilon) this._data[i][n] = 0;
           }
           break;
         }
@@ -90,26 +98,26 @@ class Matrix {
   }
 
   Matrix toRE() {
-    this.data = this.gaussElimination()._normalizeRE().data;
+    this._data = this.gaussElimination()._normalizeRE()._data;
     return this;
   }
 
   Matrix toRRE() {
     double ratio, temp;
     this.toRE();
-    if (this.row > 1 || this.col > 1) {
-      for (int i = this.row - 1; i >= 0; i--) {
-        for (int k = 0; k < this.col; k++) {
+    if (this._row > 1 || this._col > 1) {
+      for (int i = this._row - 1; i >= 0; i--) {
+        for (int k = 0; k < this._col; k++) {
           //  GE on pivots
-          if (this.data[i][k].abs() > _epsilon) {
+          if (this._data[i][k].abs() > _epsilon) {
             for (int rowThis = 0; rowThis < i; rowThis++) {
-              if (this.data[rowThis + 1][k].abs() > _epsilon)
-                ratio = this.data[rowThis][k] / this.data[rowThis + 1][k];
+              if (this._data[rowThis + 1][k].abs() > _epsilon)
+                ratio = this._data[rowThis][k] / this._data[rowThis + 1][k];
               else
                 ratio = 1;
-              for (int n = 0; n < col; n++) {
-                temp = ratio * this.data[rowThis + 1][n];
-                this.data[rowThis][n] = this.data[rowThis][n] - temp;
+              for (int n = 0; n < _col; n++) {
+                temp = ratio * this._data[rowThis + 1][n];
+                this._data[rowThis][n] = this._data[rowThis][n] - temp;
               }
             }
             break;
@@ -130,9 +138,9 @@ class Matrix {
   Matrix toCofactor() {
     assert(this.isSquare(), "Not a square matrix, can't calculate determinant");
     int size, rowOutput, colOutput;
-    var output = Matrix.withSize(row: this.row - 1, col: this.col - 1);
+    var output = Matrix.withSize(row: this._row - 1, col: this._col - 1);
     var copy = Matrix.copyFrom(this);
-    size = this.size;
+    size = this._size;
     rowOutput = 0;
     colOutput = 0;
     for (int rowIndex = 0; rowIndex < size; rowIndex++) {
@@ -140,7 +148,7 @@ class Matrix {
         for (int rowPos = 0; rowPos < size; rowPos++) {
           for (int colPos = 0; colPos < size; colPos++) {
             if (rowPos != rowIndex && colPos != colIndex) {
-              output.data[rowOutput][colOutput++] = copy.data[rowPos][colPos];
+              output._data[rowOutput][colOutput++] = copy._data[rowPos][colPos];
               if (colOutput == size - 1) {
                 colOutput = 0;
                 rowOutput++;
@@ -151,9 +159,9 @@ class Matrix {
             }
           }
         }
-        this.data[rowIndex][colIndex] = output.det();
+        this._data[rowIndex][colIndex] = output.det();
         if ((rowIndex + colIndex) % 2 == 1)
-          this.data[rowIndex][colIndex] = this.data[rowIndex][colIndex] * -1;
+          this._data[rowIndex][colIndex] = this._data[rowIndex][colIndex] * -1;
       }
     }
     return this;
@@ -180,16 +188,16 @@ class Matrix {
 
   ///  Matrix Addition
   Matrix operator +(Matrix other) {
-    assert(this.row == other.row && this.col == other.col,
+    assert(this._row == other._row && this._col == other._col,
         'Dimension of matrixes does not match');
-    var result = Matrix(data: this.data);
-    result.row = other.row;
-    result.col = other.col;
-    for (int i = 0; i < row; i++) {
-      for (int j = 0; j < col; j++) {
-        assert(this.data[i][j] != null && other.data[i][j] != null,
+    var result = Matrix(data: this._data);
+    result._row = other._row;
+    result._col = other._col;
+    for (int i = 0; i < _row; i++) {
+      for (int j = 0; j < _col; j++) {
+        assert(this._data[i][j] != null && other._data[i][j] != null,
             'Invalid null type in addition');
-        result.data[i][j] = this.data[i][j] + other.data[i][j];
+        result._data[i][j] = this._data[i][j] + other._data[i][j];
       }
     }
     return result;
@@ -200,21 +208,21 @@ class Matrix {
     var result = Matrix.copyFrom(this);
     //  A scaling operation of Matrix with const scale
     if (other is num) {
-      for (int i = 0; i < row; i++) {
-        for (int j = 0; j < col; j++) {
-          result.data[i][j] = other * data[i][j];
+      for (int i = 0; i < _row; i++) {
+        for (int j = 0; j < _col; j++) {
+          result._data[i][j] = other * _data[i][j];
         }
       }
     }
     //  Matrix Multiplication, O(n^3) default algorithm
     else if (other is Matrix) {
       // TODO
-      result = Matrix.withSize(row: this.row, col: other.col);
-      for (int i = 0; i < result.row; i++) {
-        for (int j = 0; j < result.col; j++) {
-          result.data[i][j] = 0;
-          for (int k = 0; k < this.col; k++) {
-            result.data[i][j] += this.data[i][k] * other.data[k][j];
+      result = Matrix.withSize(row: this._row, col: other._col);
+      for (int i = 0; i < result._row; i++) {
+        for (int j = 0; j < result._col; j++) {
+          result._data[i][j] = 0;
+          for (int k = 0; k < this._col; k++) {
+            result._data[i][j] += this._data[i][k] * other._data[k][j];
           }
         }
       }
@@ -230,7 +238,7 @@ class Matrix {
 
   ///  Matrix dot product, if the matrix is a vector
   Matrix operator &(Matrix other) {
-    assert(col == other.row,
+    assert(_col == other._row,
         'Dimension does not match for matrix multiplication.');
     return Matrix(data: [
       [1]
@@ -239,13 +247,13 @@ class Matrix {
 
   /// Matrix transpose
   Matrix operator ~() {
-    assert(this.size != null && this.row == this.col,
+    assert(this._size != null && this._row == this._col,
         'Can not transpose a non-square matrix');
-    for (int i = 0; i < this.row; i++) {
-      for (int j = i + 1; j < this.col; j++) {
-        var temp = this.data[j][i];
-        this.data[j][i] = this.data[i][j];
-        this.data[i][j] = temp;
+    for (int i = 0; i < this._row; i++) {
+      for (int j = i + 1; j < this._col; j++) {
+        var temp = this._data[j][i];
+        this._data[j][i] = this._data[i][j];
+        this._data[i][j] = temp;
       }
     }
     return this;
@@ -256,7 +264,7 @@ class Matrix {
     assert(power >= -1,
         'Invalid power, can only perform positive power multiplication');
     //  Inverse Matrix
-    var out = Matrix(data: this.data);
+    var out = Matrix(data: this._data);
     if (power == -1) {
       //  TODO
       return this.inv();
