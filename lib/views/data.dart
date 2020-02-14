@@ -9,8 +9,8 @@ class DataPage extends StatefulWidget {
 }
 
 class _DataPageState extends State<DataPage> {
-  List<Matrix> data = [];
-  final _formKey = GlobalKey<FormState>();
+  Map<String, Matrix> data = {};
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,6 +21,7 @@ class _DataPageState extends State<DataPage> {
           : ListView.builder(
               itemCount: data.length,
               itemBuilder: (BuildContext context, i) {
+                String key = this.data.keys.elementAt(i);
                 return Center(
                   child: Card(
                     elevation: 3,
@@ -29,8 +30,8 @@ class _DataPageState extends State<DataPage> {
                       children: <Widget>[
                         ListTile(
                           leading: Icon(Icons.add_box),
-                          title: Text('Matrix ${i + 1}'),
-                          subtitle: Text('${data[i].row}x${data[i].col}'),
+                          title: Text('${key}'),
+                          subtitle: Text('${data[key].row}x${data[key].col}'),
                           // TODO onLongPress
                           onLongPress: () => print('Editing Matrix'),
                         )
@@ -48,37 +49,16 @@ class _DataPageState extends State<DataPage> {
               builder: (BuildContext context) {
                 return AlertDialog(
                   titlePadding: EdgeInsets.all(0),
-                  title: AppBar(
-                    leading: Builder(
-                      builder: (BuildContext context) {
-                        return IconButton(
-                          icon: Icon(Icons.arrow_back),
-                          tooltip: 'Back',
-                          onPressed: () => Navigator.pop(context),
-                        );
+                  content: SingleChildScrollView(
+                    child: MatrixAddForm(
+                      matrix: Matrix(data: [
+                        [0]
+                      ]),
+                      callback: (Matrix matrix, String name) {
+                        this.setState(() => this.data[name] = matrix);
+                        print('Added to MatrixMap: ${this.data[name].data}');
                       },
                     ),
-                    title: Text('Add Matrix'),
-                    centerTitle: true,
-                    actions: <Widget>[
-                      Builder(
-                        builder: (BuildContext context) {
-                          return IconButton(
-                            icon: Icon(Icons.save),
-                            tooltip: 'Save Matrix',
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                          );
-                        },
-                      )
-                    ],
-                  ),
-                  content: SingleChildScrollView(        
-                    child: MatrixAddForm(
-                        matrix: Matrix(data: [
-                      [0]
-                    ])),
                   ),
                   contentPadding: EdgeInsets.all(0),
                 );
