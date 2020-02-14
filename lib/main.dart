@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import './classes/matrix.dart';
 import './navbar.dart';
 
 void main() => runApp(Main());
