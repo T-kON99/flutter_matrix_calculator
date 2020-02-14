@@ -31,6 +31,8 @@ class _TabViewState extends State<TabView> {
         return DataPage();
       case '/calculator':
         return CalculatorPage();
+      default:
+        return DataPage();
     }
   }
 
