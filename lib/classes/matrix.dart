@@ -8,10 +8,11 @@ class Matrix {
   int get size => this._size;
   List<List<double>> get data => this._data;
 
+  /// Generate a 0-filled matrix with custom size.
   Matrix.withSize({row, col}) {
     this._row = row;
     this._col = col;
-    this._data = new List.generate(_row, (_) => List<double>(_col));
+    this._data = new List.generate(_row, (_) => List<double>.generate(_col, (_) => null));
     this._size = this._row == this._col ? this._row : null;
   }
 
