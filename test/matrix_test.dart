@@ -26,6 +26,62 @@ void main() {
     ]);
   });
 
+  test('Resizing 3x3 Matrix to 2x2', () {
+    final mat = Matrix(data: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ]);
+    mat.zeroFillResize(col: 2, row: 2);
+    expect(mat.data, [
+      [1, 2],
+      [4, 5]
+    ]);
+  });
+
+
+  test('Resizing 2x2 Matrix to 3x3', () {
+    final mat = Matrix(data: [
+      [1, 2],
+      [4, 5]
+    ]);
+    mat.zeroFillResize(col: 3, row: 3);
+    expect(mat.data, [
+      [1, 2, 0],
+      [4, 5, 0],
+      [0, 0, 0]
+    ]);
+  });
+
+  test('Resizing 3x3 Matrix to 2x2 and then back to 3x3', () {
+    final mat = Matrix(data: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ]);
+    mat.zeroFillResize(col: 2, row: 2);
+    mat.zeroFillResize(row: 3, col: 3);
+    expect(mat.data, [
+      [1, 2, 0],
+      [4, 5, 0],
+      [0, 0, 0]
+    ]);
+  });
+
+    test('Resizing 4x2 Matrix to 2x1', () {
+    final mat = Matrix(data: [
+      [2, 3],
+      [1, 5],
+      [0, 3],
+      [3, -1]
+    ]);
+    mat.zeroFillResize(col: 1, row: 2);
+    expect(mat.data, [
+      [2],
+      [1],
+    ]);
+  });
+
   test('Matrix 2x3 Addition', () {
     final matA = Matrix(data: [[1, 5, 3], [3, 6, 1]]);
     final matB = Matrix(data: [[2, 1, 0], [-4, 5, 1]]);
@@ -96,5 +152,14 @@ void main() {
       [moreOrLessEquals(-0.6), moreOrLessEquals(0.8)], 
       [moreOrLessEquals(0.4), moreOrLessEquals(-0.2)]
     ]);
+  });
+
+  test('Latex text of 2x3 Matrix', () {
+    final mat = Matrix(data: [
+      [1, 2, 3],
+      [4, 5, 6]
+    ]);
+    final supposedLatex = r"$$\begin{matrix}"r"1.0&2.0&3.0\\"r"4.0&5.0&6.0"r"\end{matrix}$$";
+    expect(mat.getMathJexText(parentheses: 'plain'), supposedLatex);
   });
 }
