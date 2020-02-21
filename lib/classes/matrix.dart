@@ -9,7 +9,7 @@ class Matrix {
   List<List<double>> get data => this._data;
 
   /// Generate a 0-filled matrix with custom size.
-  Matrix.withSize({row, col}) {
+  Matrix.withSize({int row, int col}) {
     this._row = row;
     this._col = col;
     this._data = new List.generate(_row, (_) => List<double>.generate(_col, (_) => null));
@@ -33,6 +33,18 @@ class Matrix {
 
   bool isSquare() => this._row == this._col;
 
+  void zeroFillResize({int col, int row}) {
+    List<List<double>> newData = new List.generate(row, (indexRow) => List<double>.generate(col, (indexCol) {
+      if(indexRow >= this._row || indexCol >= this._col) {
+        return 0;
+      }
+      else return this.data[indexRow][indexCol];
+    }));
+    this._row = row;
+    this._col = col;
+    this._data = newData;
+  }
+
   /// Determinant of a matrix
   double det() {
     if(!this.isSquare()) throw('A non-square matrix has no determinant value');
@@ -45,7 +57,6 @@ class Matrix {
   }
 
   Matrix gaussElimination() {
-    //  TODO BUG, fix this.data pointing to old value!
     var out = Matrix.copyFrom(this);
     double ratio;
     for (int j = 0; j < this._col; j++) {
@@ -175,7 +186,6 @@ class Matrix {
   }
 
   Matrix inv() {
-    //  TODO
     assert(this.isSquare(), 'Can not perform inverse on a non-square matrix');
     var out = Matrix.copyFrom(this);
     double det;
@@ -267,7 +277,6 @@ class Matrix {
     //  Inverse Matrix
     var out = Matrix(data: this._data);
     if (power == -1) {
-      //  TODO
       return this.inv();
     } else {
       for (int i = 0; i < power - 1; i++) {
@@ -275,5 +284,21 @@ class Matrix {
       }
     }
     return out;
+  }
+
+  String getMathJexText({String parentheses}) {
+    final Map<String, String> tags = {
+      "plain": "matrix",
+      "round": "pmatrix",
+      "square": "bmatrix",
+      "curly": "Bmatrix",
+      "one-pipe": "vmatrix",
+      "double-pipe": "Vmatrix"
+    };
+    assert(tags.containsKey(parentheses), "Invalid type of parentheses.");
+    String tag = tags[parentheses];
+    String latexMatrix = this.data.map((row) => row.join('&')).join(r'\\');
+    String latexText = r"$$\begin""{$tag}""$latexMatrix"r"\end""{$tag}\$\$";
+    return latexText;
   }
 }
