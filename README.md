@@ -1,16 +1,24 @@
-# matrix_calculator
+# matrix_calculator (WIP)
 
-A new Flutter project.
+A Flutter-based mobile application designed to do Matrix Operation which includes:
+
+1. Addition/Substraction
+2. Multiplication
+3. Gauss Elimination
+4. Row Echelon Form (REF)
+5. Reduced Row Echelon Form (RREF)
+6. Adjoint
+7. Cofactors
+8. Determinant
+9. Inverse
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+Make sure to have [Flutter](https://flutter.dev/docs/get-started/install) installed on your local machine.
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```bash
+git clone https://github.com/T-kON99/flutter_matrix_calculator.git matrix_calculator
+cd matrix_calculator
+flutter pub get
+flutter run
+```
