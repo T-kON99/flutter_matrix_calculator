@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import './views/data.dart';
 import './views/calculator.dart';
+import './classes/matrix.dart';
 
 class NavTab {
   const NavTab(this.title, this.icon, this.color, this.route);
@@ -11,8 +12,9 @@ class NavTab {
 }
 
 class TabView extends StatefulWidget {
-  const TabView({Key key, this.tab}) : super(key: key);
+  const TabView({Key key, this.tab, this.data}) : super(key: key);
   final NavTab tab;
+  final Map<String, Matrix> data;
   @override
   _TabViewState createState() => _TabViewState();
 }
@@ -28,9 +30,9 @@ class _TabViewState extends State<TabView> {
   Widget build(BuildContext context) {
     switch(widget.tab.route) {
       case '/data':
-        return DataPage();
+        return DataPage(data: widget.data);
       case '/calculator':
-        return CalculatorPage();
+        return CalculatorPage(data: widget.data);
       default:
         return DataPage();
     }
