@@ -1,17 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_tex/flutter_tex.dart';
 import '../classes/matrix.dart';
 import '../form/matrix_form.dart';
+import '../dialog/matrix_latex.dart';
 
 class DataPage extends StatefulWidget {
+  final Map<String, Matrix> data;
+  const DataPage({Key key, this.data}) : super(key: key);
   @override
   _DataPageState createState() => _DataPageState();
 }
 
 class _DataPageState extends State<DataPage> {
-  Map<String, Matrix> data = {};
-
   //  Helper function to show matrix dialog
   void showMatrixDialog(
       {BuildContext context, Matrix matrix, String matrixName}) {
@@ -28,12 +31,12 @@ class _DataPageState extends State<DataPage> {
                   this.setState(() {
                     if (name != matrixName) {
                       print('Updated Matrix $matrixName to $name');
-                      this.data.remove(matrixName);
+                      this.widget.data.remove(matrixName);
                     }
-                    this.data[name] = matrix;
+                    this.widget.data[name] = matrix;
                   });
                   print(
-                      'Added to MatrixMap Matrix $name: ${this.data[name].data}');
+                      'Added to MatrixMap Matrix $name: ${this.widget.data[name].data}');
                 },
               ),
             ),
@@ -45,14 +48,14 @@ class _DataPageState extends State<DataPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: data.length == 0
+      body: widget.data.length == 0
           ? Center(
               child: Text('Add matrix by tapping [+] below'),
             )
           : ListView.builder(
-              itemCount: data.length,
+              itemCount: widget.data.length,
               itemBuilder: (BuildContext context, i) {
-                String key = this.data.keys.elementAt(i);
+                String key = this.widget.data.keys.elementAt(i);
                 return Center(
                   child: Card(
                     elevation: 3,
@@ -62,27 +65,18 @@ class _DataPageState extends State<DataPage> {
                         ListTile(
                           leading: Icon(Icons.add_box),
                           title: Text(key),
-                          subtitle: Text('${data[key].row}x${data[key].col}'),
+                          subtitle: Text(
+                              '${widget.data[key].row}x${widget.data[key].col}'),
                           //  TODO: Add onTap function to display matrix content in latex form.
                           onTap: () {
                             showDialog(
                                 context: context,
                                 builder: (BuildContext context) {
-                                  return AlertDialog(
-                                    title: Text('Matrix $key'),
-                                    content: TeXView(
-                                      teXHTML:
-                                          this.data[key].getMathJexText(parentheses: "square"),
-                                      renderingEngine: RenderingEngine
-                                          .Katex, // Katex for fast render and MathJax for quality render.
-                                      onRenderFinished: (height) {
-                                        print("Widget Height is : $height");
-                                      },
-                                      onPageFinished: (string) {
-                                        print("Page Loading finished");
-                                      },
-                                    ),
-                                  );
+                                  String matrixLatexText = this
+                                      .widget
+                                      .data[key]
+                                      .getMathJexText(parentheses: "square");
+                                  return MatrixLatex(label: key, latexText: matrixLatexText);
                                 });
                           },
                           onLongPress: () {
@@ -98,7 +92,7 @@ class _DataPageState extends State<DataPage> {
                                         Navigator.pop(context);
                                         showMatrixDialog(
                                             context: context,
-                                            matrix: this.data[key],
+                                            matrix: this.widget.data[key],
                                             matrixName: key);
                                       },
                                     ),
@@ -116,6 +110,7 @@ class _DataPageState extends State<DataPage> {
                                                     child: Text('Yes'),
                                                     onPressed: () {
                                                       this.setState(() => this
+                                                          .widget
                                                           .data
                                                           .remove(key));
                                                       Navigator.pop(context);

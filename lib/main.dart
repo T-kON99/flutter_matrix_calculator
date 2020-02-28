@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './navbar.dart';
+import './classes/matrix.dart';
 
 void main() => runApp(Main());
 
@@ -10,6 +11,8 @@ class Main extends StatefulWidget {
 
 class _MainState extends State<Main> {
   int _curTabIndex = 0;
+  Map<String, Matrix> data = {};
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,7 +25,7 @@ class _MainState extends State<Main> {
         child: IndexedStack(
           index: _curTabIndex,
           children: Navigations.map<Widget>((NavTab tab) {
-            return TabView(tab: tab);
+            return TabView(tab: tab, data: this.data);
           }).toList(),
         ),
       ),
