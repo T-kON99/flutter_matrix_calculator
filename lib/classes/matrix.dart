@@ -1,17 +1,23 @@
 class Matrix {
   int _row, _col, _size;
   List<List<double>> _data;
+  List<String> _historyMessage;
+  List<Matrix> _historyState;
   static const _epsilon = 0.0000000000001;
 
   int get row => this._row;
   int get col => this._col;
   int get size => this._size;
   List<List<double>> get data => this._data;
+  List<String> get historyMessage => this._historyMessage;
+  List<Matrix> get historyState => this._historyState;
 
   /// Generate a 0-filled matrix with custom size.
   Matrix.withSize({int row, int col}) {
     this._row = row;
     this._col = col;
+    this._historyMessage = [];
+    this._historyState = [];
     this._data = new List.generate(_row, (_) => List<double>.generate(_col, (_) => null));
     this._size = this._row == this._col ? this._row : null;
   }
@@ -20,6 +26,8 @@ class Matrix {
     this._data = data;
     this._row = this._data.length;
     this._col = this._data[0].length;
+    this._historyMessage = [];
+    this._historyState = [];
     this._size = this._row == this._col ? this._row : null;
   }
 
@@ -28,6 +36,8 @@ class Matrix {
     for(int i = 0; i < copy._row; i++)
       for(int j = 0; j < copy._col; j++)
         copy._data[i][j] = other._data[i][j];
+    copy._historyMessage = new List<String>.from(other._historyMessage);
+    copy._historyState = new List<Matrix>.from(other._historyState);
     return copy;
   }
 
@@ -68,10 +78,14 @@ class Matrix {
           for (int n = 0; n < this._col; n++) {
             out._data[i - 1][n] = out._data[i - 1][n] + out._data[i][n];
           }
+          out._historyMessage.add('Element at Row $i, Col ${j+1} is 0, perform Elementary Row Operation Row $i = Row $i + Row ${i+1}');
+          out._historyState.add(Matrix.copyFrom(out));
         }
 
         //  Step 2
         //  Get the ratio if applicable (non zero value, otherwise will result in dividing by 0)
+        out._historyMessage.add('Get Ratio of element at Col ${j+1} which is Row ${i+1}/Row $i');
+        out._historyState.add(Matrix.copyFrom(out));
         if (out._data[i - 1][j] != 0)
           ratio = out._data[i][j] / out._data[i - 1][j];
         else
@@ -82,6 +96,8 @@ class Matrix {
         for (int n = 0; n < this._col; n++) {
           out._data[i][n] = out._data[i][n] - (ratio * out._data[i - 1][n]);
         }
+        out._historyMessage.add('Perform Elementary Row Operation at Row ${i + 1} = Row ${i + 1} - ($ratio * Row $i)');
+        out._historyState.add(Matrix.copyFrom(out));
       }
     }
     return out;
@@ -98,6 +114,8 @@ class Matrix {
             //Fixes floating point problem. Ex : 0 * -0.333333 returns -0 instead of 0.
             if (this._data[i][n].abs() < _epsilon) this._data[i][n] = 0;
           }
+          this._historyMessage.add('Normalizing (Multiply by a ratio to make particular element into 1) element at Row ${i+1}, Col ${j+1} with ratio $ratio');
+          this._historyState.add(Matrix.copyFrom(this));
           break;
         }
       }
@@ -105,31 +123,30 @@ class Matrix {
     return this;
   }
 
-  Matrix gaussJordanElimination() {
-    //  TODO?
-  }
-
   Matrix toRE() {
     this._data = this.gaussElimination()._normalizeRE()._data;
     return this;
   }
 
-  Matrix toRRE() {
+  //  TODO: ADD THE HISTORY STATE AND MESSAGE
+  Matrix getRRE() {
     double ratio, temp;
-    this.toRE();
-    if (this._row > 1 || this._col > 1) {
-      for (int i = this._row - 1; i >= 0; i--) {
-        for (int k = 0; k < this._col; k++) {
+    Matrix out = Matrix.copyFrom(this).getRE();
+    if (out._row > 1 || out._col > 1) {
+      for (int i = out._row - 1; i >= 0; i--) {
+        for (int k = 0; k < out._col; k++) {
           //  GE on pivots
-          if (this._data[i][k].abs() > _epsilon) {
+          out._historyMessage.add('Perform Gaussian Elimination on the pivots');
+          out._historyState.add(Matrix.copyFrom(out));
+          if (out._data[i][k].abs() > _epsilon) {
             for (int rowThis = 0; rowThis < i; rowThis++) {
-              if (this._data[rowThis + 1][k].abs() > _epsilon)
-                ratio = this._data[rowThis][k] / this._data[rowThis + 1][k];
+              if (out._data[rowThis + 1][k].abs() > _epsilon)
+                ratio = out._data[rowThis][k] / out._data[rowThis + 1][k];
               else
                 ratio = 1;
               for (int n = 0; n < _col; n++) {
-                temp = ratio * this._data[rowThis + 1][n];
-                this._data[rowThis][n] = this._data[rowThis][n] - temp;
+                temp = ratio * out._data[rowThis + 1][n];
+                out._data[rowThis][n] = out._data[rowThis][n] - temp;
               }
             }
             break;
@@ -137,14 +154,14 @@ class Matrix {
         }
       }
     }
-    return this;
+    return out;
   }
 
   /// Return a new matrix which is the RE (Row Echelon) form of given matrix.
   Matrix getRE() {
-    //  TODO
     var out = Matrix.copyFrom(this);
-    return out.toRE();
+    out = out.gaussElimination()._normalizeRE();
+    return out;
   }
 
   Matrix toCofactor() {
@@ -171,9 +188,15 @@ class Matrix {
             }
           }
         }
+        this._historyMessage.add('Get cofactor matrix by excluding Row ${rowIndex+1} & Col ${colIndex+1}');
+        this._historyState.add(Matrix.copyFrom(output));
         this._data[rowIndex][colIndex] = output.det();
+        this._historyMessage.add('Element Row ${rowIndex+1}, Col ${colIndex+1} has the value of the determinant of cofactor.');
+        this._historyState.add(Matrix.copyFrom(this));
         if ((rowIndex + colIndex) % 2 == 1)
           this._data[rowIndex][colIndex] = this._data[rowIndex][colIndex] * -1;
+        this._historyMessage.add('Multiply by -1 when Index of (Row + Col) = (${rowIndex+1} + ${colIndex+1}) is not divisible by 2');
+        this._historyState.add(Matrix.copyFrom(this));
       }
     }
     return this;
@@ -185,6 +208,8 @@ class Matrix {
     return ~this;
   }
 
+  //  TODO: Implement Faster inv with just concatenating n x n matrix with n x n Identity matrix and then taking RRE.
+  //  Inverse will be the right side of the matrix (Was identity)
   Matrix inv() {
     assert(this.isSquare(), 'Can not perform inverse on a non-square matrix');
     var out = Matrix.copyFrom(this);
@@ -201,7 +226,7 @@ class Matrix {
   Matrix operator +(Matrix other) {
     assert(this._row == other._row && this._col == other._col,
         'Dimension of matrixes does not match');
-    var result = Matrix(data: this._data);
+    var result = Matrix.copyFrom(this);
     result._row = other._row;
     result._col = other._col;
     for (int i = 0; i < _row; i++) {
@@ -209,6 +234,8 @@ class Matrix {
         assert(this._data[i][j] != null && other._data[i][j] != null,
             'Invalid null type in addition');
         result._data[i][j] = this._data[i][j] + other._data[i][j];
+        result._historyMessage.add('Add element at position Row ${i+1}, Col ${j+1}: ${this._data[i][j]} + ${other._data[i][j]} = ${result._data[i][j]}');
+        result._historyState.add(Matrix.copyFrom(result));
       }
     }
     return result;
@@ -222,12 +249,13 @@ class Matrix {
       for (int i = 0; i < _row; i++) {
         for (int j = 0; j < _col; j++) {
           result._data[i][j] = other * _data[i][j];
+          result._historyMessage.add('Multiply $other with element at Row ${i+1}, Col ${j+1}: $other * ${_data[i][j]} = ${result._data[i][j]}');
+          result._historyState.add(Matrix.copyFrom(result));
         }
       }
     }
     //  Matrix Multiplication, O(n^3) default algorithm
     else if (other is Matrix) {
-      // TODO
       result = Matrix.withSize(row: this._row, col: other._col);
       for (int i = 0; i < result._row; i++) {
         for (int j = 0; j < result._col; j++) {
@@ -235,6 +263,8 @@ class Matrix {
           for (int k = 0; k < this._col; k++) {
             result._data[i][j] += this._data[i][k] * other._data[k][j];
           }
+          result._historyMessage.add('Perform a dot product on First Matrix Row ${i+1} & Second Matrix Col ${j+1}, result will be element at Row ${i+1}, Col ${j+1}');
+          result._historyState.add(Matrix.copyFrom(result));
         }
       }
     }
@@ -242,12 +272,29 @@ class Matrix {
   }
 
   ///  Matrix substraction
+  //  Not utizing overloaded + operator because this is indeed faster
+  //  Rather than performing -1 * other which costs O(n^2) already and then perform the Add which is another O(n^2),
+  //  We just do it in one go.
   Matrix operator -(Matrix other) {
-    var result = this + (other * -1);
+    assert(this._row == other._row && this._col == other._col,
+        'Dimension of matrixes does not match');
+    var result = Matrix.copyFrom(this);
+    result._row = other._row;
+    result._col = other._col;
+    for (int i = 0; i < _row; i++) {
+      for (int j = 0; j < _col; j++) {
+        assert(this._data[i][j] != null && other._data[i][j] != null,
+            'Invalid null type in addition');
+        result._data[i][j] = this._data[i][j] - other._data[i][j];
+        result._historyMessage.add('Subtract element at position Row ${i+1}, Col ${j+1}: ${this._data[i][j]} - ${other._data[i][j]} = ${result._data[i][j]}');
+        result._historyState.add(Matrix.copyFrom(result));
+      }
+    }
     return result;
   }
 
   ///  Matrix dot product, if the matrix is a vector
+  //  TODO
   Matrix operator &(Matrix other) {
     assert(_col == other._row,
         'Dimension does not match for matrix multiplication.');
@@ -267,6 +314,8 @@ class Matrix {
         this._data[i][j] = temp;
       }
     }
+    this._historyMessage.add('Transpose Matrix');
+    this._historyState.add(Matrix.copyFrom(this));
     return this;
   }
 
