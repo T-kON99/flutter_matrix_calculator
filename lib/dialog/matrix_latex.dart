@@ -17,7 +17,6 @@ class _MatrixLatexState extends State<MatrixLatex> {
     return AlertDialog(
       title: Text('Matrix ${this.widget.label}'),
       content: Container(
-        //  TODO  BUG: Need to be able to wait until the tex finishes rendering and then set the container height
         child: TeXView(
           teXHTML: this.widget.latexText,
           renderingEngine: RenderingEngine
