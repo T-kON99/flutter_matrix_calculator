@@ -9,14 +9,22 @@ class CalculatorPage extends StatefulWidget {
   _CalculatorPageState createState() => _CalculatorPageState();
 }
 
+//  TODO: IMPLEMENT CALCULATOR PAGE
+//  1.  Have preset of functions available which user can select (Ex: Add, Multiplication, Inverse, GE, RE, RRE)
+//  2.  If (1) finishes, maybe let another field which is "Custom". This will behave like MATLAB (Ex: Users able to input: det(mat(A)*mat(B))
 class _CalculatorPageState extends State<CalculatorPage> {
+  List<String> actions = ["add"];
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: ListView.builder(
-        itemCount: this.widget.data.length,
+        itemCount: this.actions.length,
         itemBuilder: (BuildContext context, i) {
-        return Text('ASDF');
+          return Center(
+            child: Card(
+              child: Text(this.actions[i]),
+            ),
+          );
       }),
     );
   }
