@@ -1,8 +1,5 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_tex/flutter_tex.dart';
 import '../classes/matrix.dart';
 import '../form/matrix_form.dart';
 import '../dialog/matrix_latex.dart';
@@ -67,7 +64,6 @@ class _DataPageState extends State<DataPage> {
                           title: Text(key),
                           subtitle: Text(
                               '${widget.data[key].row}x${widget.data[key].col}'),
-                          //  TODO: Add onTap function to display matrix content in latex form.
                           onTap: () {
                             showDialog(
                                 context: context,
@@ -133,7 +129,6 @@ class _DataPageState extends State<DataPage> {
                 );
               },
             ),
-      // TODO:  Fully implement adding matrix dialog
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showMatrixDialog(
