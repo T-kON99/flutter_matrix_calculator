@@ -114,7 +114,7 @@ class Matrix {
             //Fixes floating point problem. Ex : 0 * -0.333333 returns -0 instead of 0.
             if (this._data[i][n].abs() < _epsilon) this._data[i][n] = 0;
           }
-          this._historyMessage.add('Normalizing (Multiply by a ratio to make particular element into 1) element at Row ${i+1}, Col ${j+1} with ratio $ratio');
+          this._historyMessage.add('Normalizing Row ${i+1} (Multiply by a ratio to make element at Row ${i+1}, Col ${j+1} into 1) with ratio $ratio');
           this._historyState.add(Matrix.copyFrom(this));
           break;
         }
@@ -136,8 +136,6 @@ class Matrix {
       for (int i = out._row - 1; i >= 0; i--) {
         for (int k = 0; k < out._col; k++) {
           //  GE on pivots
-          out._historyMessage.add('Perform Gaussian Elimination on the pivots');
-          out._historyState.add(Matrix.copyFrom(out));
           if (out._data[i][k].abs() > _epsilon) {
             for (int rowThis = 0; rowThis < i; rowThis++) {
               if (out._data[rowThis + 1][k].abs() > _epsilon)
@@ -149,6 +147,8 @@ class Matrix {
                 out._data[rowThis][n] = out._data[rowThis][n] - temp;
               }
             }
+            out._historyMessage.add('Perform Gaussian Elimination on the pivots which is on Row ${i+1}, Col ${k+1}');
+            out._historyState.add(Matrix.copyFrom(out));
             break;
           }
         }
@@ -294,7 +294,7 @@ class Matrix {
   }
 
   ///  Matrix dot product, if the matrix is a vector
-  //  TODO
+  //  TODO**: May not be implemented.
   Matrix operator &(Matrix other) {
     assert(_col == other._row,
         'Dimension does not match for matrix multiplication.');
