@@ -107,9 +107,9 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                                     //  Highlighted text color
                                     accentColor: Colors.blue,
                                     textTheme: theme.textTheme.copyWith(
-                                      headline: theme.textTheme.headline
+                                      headline5: theme.textTheme.headline5
                                           .copyWith(), //  Other styles for highlighted
-                                      body1: theme.textTheme.headline.copyWith(
+                                      bodyText2: theme.textTheme.headline5.copyWith(
                                         fontSize: 10,
                                       ), // Not highlighted styles
                                     )),
@@ -130,9 +130,9 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                                     //  Highlighted text color
                                     accentColor: Colors.blue,
                                     textTheme: theme.textTheme.copyWith(
-                                      headline: theme.textTheme.headline
+                                      headline5: theme.textTheme.headline5
                                           .copyWith(), //  Other styles for highlighted
-                                      body1: theme.textTheme.headline.copyWith(
+                                      bodyText2: theme.textTheme.headline5.copyWith(
                                         fontSize: 10,
                                       ), // Not highlighted styles
                                     )),
