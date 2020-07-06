@@ -192,12 +192,14 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                     cells: row
                         .asMap()
                         .map((int colIndex, double value) {
+                          var _controller = TextEditingController(text: value.toString());
                           return MapEntry(
                               colIndex,
                               DataCell(
                                 TextFormField(
+                                  controller: _controller,
                                   keyboardType: TextInputType.number,
-                                  initialValue: value.toString(),
+                                  // initialValue: value.toString(),
                                   validator: (value) {
                                     if (value.isEmpty) {
                                       return 'Enter a value';
@@ -205,6 +207,12 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                                       return 'Enter a valid number';
                                     }
                                     return null;
+                                  },
+                                  onTap: () => {
+                                    _controller.clear()
+                                  },
+                                  onChanged: (value) => {
+                                    _formKey.currentState.validate()
                                   },
                                   onSaved: (value) {
                                     if (_formKey.currentState.validate()) {
