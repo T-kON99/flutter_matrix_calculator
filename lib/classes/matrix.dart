@@ -293,16 +293,6 @@ class Matrix {
     return result;
   }
 
-  ///  Matrix dot product, if the matrix is a vector
-  //  TODO**: May not be implemented.
-  Matrix operator &(Matrix other) {
-    assert(_col == other._row,
-        'Dimension does not match for matrix multiplication.');
-    return Matrix(data: [
-      [1]
-    ]);
-  }
-
   /// Matrix transpose
   Matrix operator ~() {
     assert(this._size != null && this._row == this._col,
