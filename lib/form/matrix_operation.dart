@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix_calculator/dialog/matrix_calculate.dart';
 import '../classes/matrix.dart';
+import '../presentation/custom_icon_icons.dart' show CustomIcon;
 
 //  TODO: Finish this form. HALFWAY
 class MatrixOperationForm {
@@ -9,8 +10,8 @@ class MatrixOperationForm {
       this.singleOperation, this.name, this.description);
   final String title;
   final IconData icon;
-  final MaterialColor color;
-  final MaterialColor bgColor;
+  final Color color;
+  final Color bgColor;
   final bool singleOperation;
   final String name;
   final String description;
@@ -95,75 +96,76 @@ Card buildCard(
   );
 }
 
-const List<MatrixOperationForm> MatrixOperations = <MatrixOperationForm>[
+//  TODO: Give appropriate icons
+final List<MatrixOperationForm> MatrixOperations = <MatrixOperationForm>[
   MatrixOperationForm(
       'Addition',
-      Icons.add_box,
-      Colors.green,
+      CustomIcon.plus,
+      Colors.yellow,
       Colors.green,
       false,
       'add',
       'Perform addition of Matrix 1 + Matrix 2. Dimension of both Matrixes must be exactly the same'),
   MatrixOperationForm(
       'Substraction',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.minus,
+      Colors.yellow,
       Colors.blue,
       false,
       'sub',
       'Perform subtraction of Matrix 1 - Matrix 2. Dimension of both Matrixes must be exactly the same'),
   MatrixOperationForm(
       'Matrix Multiplication',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.asterisk,
+      Colors.green[200],
       Colors.red,
       false,
       'mmult',
       'Perform multiplication of a Matrix 1 * Matrix 2. Dimension of both Matrixes must obey m x n * n x k.'),
   MatrixOperationForm(
       'Scalar Multiplication',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.cancel,
+      Colors.green[200],
       Colors.cyan,
       false,
       'smult',
       'Perform scalar multiplication of Matrix * Decimal Number'),
   MatrixOperationForm(
       'Power',
-      Icons.question_answer,
-      Colors.green,
-      Colors.yellow,
+      CustomIcon.angle_up,
+      Colors.blue[300],
+      Colors.yellow[700],
       true,
       'pow',
       'Perform power operation. Example would be (Matrix 1)^(Integer Power). A power of -1 will be calculating its inverse.'),
   MatrixOperationForm(
       'Determinant',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.eject,
+      Colors.blue[300],
       Colors.orange,
       true,
       'det',
       'Calculate the determinant of the given Matrix. Given Matrix must be a square Matrix'),
   MatrixOperationForm(
       'Inverse',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.info,
+      Colors.green[100],
       Colors.pink,
       true,
       'inv',
       'Calculate the inverse of the given Matrix. Given Matrix must be a square Matrix'),
   MatrixOperationForm(
       'Row Echelon Form',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.yandex,
+      Colors.teal[200],
       Colors.teal,
       true,
       'RE',
       'Calculate the Row Echelon Form (RE) of the given Matrix.'),
   MatrixOperationForm(
       'Reduced Row Echelon Form',
-      Icons.question_answer,
-      Colors.green,
+      CustomIcon.calc,
+      Colors.deepPurple[200],
       Colors.purple,
       true,
       'RRE',
