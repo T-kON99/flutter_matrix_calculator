@@ -27,18 +27,23 @@ class _CalculateFormViewState extends State<CalculateFormView> {
         contentPadding: EdgeInsets.all(0),
         content: SingleChildScrollView(
             child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           children: <Widget>[
             AppBar(
               title: Text(widget.title),
               centerTitle: true,
             ),
-            ...buildDropDownMatrix(),
+            Container(
+              margin: EdgeInsets.only(top: 10), 
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: buildDropDownMatrix(),
+              )
+            ),
           ],
         )));
   }
 
-  //  TODO: Filter the selectable matrixes based on the operations. Ex: Addition -> row_1 == row_2. Multiplication -> col_1 == row_1
   List<Widget> buildDropDownMatrix() {
     Map<String, Matrix> filteredMap_1 = Map.from(widget.data)..removeWhere((key, value) => !operationHandler(key, matrix_2, widget.name));
     List<Widget> result = <Widget>[
