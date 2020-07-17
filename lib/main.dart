@@ -20,14 +20,16 @@ class _MainState extends State<Main> {
       appBar: AppBar(
         title: Text('Matrix Calculator'),
       ),
-      body: SafeArea(
-        top: false,
-        child: IndexedStack(
-          index: _curTabIndex,
-          children: Navigations.map<Widget>((NavTab tab) {
-            return TabView(tab: tab, data: this.data);
-          }).toList(),
-        ),
+      body: Builder(
+        builder: (context) => SafeArea(
+          top: false,
+          child: IndexedStack(
+            index: _curTabIndex,
+            children: Navigations.map<Widget>((NavTab tab) {
+              return TabView(tab: tab, data: this.data);
+            }).toList(),
+          ),
+        )
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _curTabIndex,
