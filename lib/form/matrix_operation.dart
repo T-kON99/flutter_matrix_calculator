@@ -98,7 +98,6 @@ Card buildCard(
   );
 }
 
-//  TODO: Give appropriate icons
 final List<MatrixOperation> MatrixOperations = <MatrixOperation>[
   MatrixOperation(
       'Addition',
