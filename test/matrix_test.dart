@@ -92,6 +92,17 @@ void main() {
     ]);
   });
 
+  test('Matrix scaling by a constant', () {
+    final mat = Matrix(data: [
+      [1, 2],
+      [2, 4],
+    ]);
+    expect((mat * 3).data, [
+      [3, 6],
+      [6, 12],
+    ]);
+  });
+
   test('Matrix 2x3 Addition', () {
     final matA = Matrix(data: [[1, 5, 3], [3, 6, 1]]);
     final matB = Matrix(data: [[2, 1, 0], [-4, 5, 1]]);
