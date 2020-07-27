@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 class MatrixLatex extends StatefulWidget {
   final String latexText;
   final String label;
-  const MatrixLatex({Key key, this.label, this.latexText}) : super(key: key);
+  final List<Widget> actions;
+  const MatrixLatex({Key key, this.label, this.latexText, this.actions}) : super(key: key);
   @override
   _MatrixLatexState createState() => _MatrixLatexState();
 }
@@ -15,12 +16,12 @@ class _MatrixLatexState extends State<MatrixLatex> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: Text('Matrix ${this.widget.label}'),
+      title: Text(widget.label),
+      actions: widget.actions,
       content: Container(
         child: TeXView(
           teXHTML: this.widget.latexText,
-          renderingEngine: RenderingEngine
-              .Katex, // Katex for fast render and MathJax for quality render.
+          renderingEngine: RenderingEngine.Katex, // Katex for fast render and MathJax for quality render.
           loadingWidget: Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
