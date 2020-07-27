@@ -75,7 +75,7 @@ class _DataPageState extends State<DataPage> {
                                     .data[key]
                                     .getMathJexText(parentheses: "square");
                                 return MatrixLatex(
-                                    label: key, latexText: matrixLatexText);
+                                    label: "Matrix $key", latexText: matrixLatexText);
                               });
                         },
                         onLongPress: () {
