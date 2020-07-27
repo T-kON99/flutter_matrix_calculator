@@ -2,21 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:matrix_calculator/dialog/matrix_calculate.dart';
 import '../classes/matrix.dart';
-import '../presentation/custom_icon_icons.dart' show CustomIcon;
+import '../operation.dart';
+import '../dialog/matrix_latex.dart';
 
 //  TODO: Finish this form. HALFWAY
-class MatrixOperation {
-  const MatrixOperation(this.title, this.icon, this.color, this.bgColor,
-      this.singleOperation, this.needMatrix, this.name, this.description);
-  final String title;
-  final IconData icon;
-  final Color color;
-  final Color bgColor;
-  final bool singleOperation;
-  final bool needMatrix;
-  final String name;
-  final String description;
-}
 
 class OperationFormView extends StatefulWidget {
   const OperationFormView({Key key, this.operation, this.data})
@@ -40,7 +29,7 @@ class _OperationFormViewState extends State<OperationFormView> {
     return buildCard(
         key: _formKey,
         widget: widget.operation,
-        context: context,
+        parentContext: context,
         data: widget.data);
   }
 
@@ -50,12 +39,41 @@ class _OperationFormViewState extends State<OperationFormView> {
   }
 }
 
+void calculate() {
+
+}
+
+//  TODO: FINISH THIS
+void showResult(String matrix_1, String matrix_2, double scalar_2, String operation, Map<String, Matrix> data, BuildContext parentContext) {
+  Matrix m1 = matrix_1 == null ? null : data[matrix_1];
+  Matrix m2 = matrix_2 == null ? null : data[matrix_2];
+  double s = scalar_2;
+  print('From matrix_operation.dart');
+  Map<String, Function> calculateHandler = {
+    Operations.ADD.shortName: (Matrix m1, Matrix m2, double s) => m1 + m2,
+    Operations.SUB.shortName: (Matrix m1, Matrix m2, double s) => m1 - m2,
+    Operations.MATRIX_MULT.shortName: (Matrix m1, Matrix m2, double s) => m1 * m2,
+    Operations.SCALAR_MULT.shortName: (Matrix m1, Matrix m2, double s) => m1 * s,
+    Operations.POW.shortName: (Matrix m1, Matrix m2, double s) => m1 ^ s.toInt(),
+    Operations.DET.shortName: (Matrix m1, Matrix m2, double s) => m1.det(),
+    Operations.INV.shortName: (Matrix m1, Matrix m2, double s) => m1.inv(),
+    Operations.RE.shortName: (Matrix m1, Matrix m2, double s) => m1.getRE(),
+    Operations.RRE.shortName: (Matrix m1, Matrix m2, double s) => m1.getRRE(),
+  };
+  print('Performing calculation of: Matrix $matrix_1 {$operation} Matrix $matrix_2 | double $scalar_2 or int ${scalar_2?.toInt()}');
+  Matrix result = calculateHandler[operation](m1, m2, s);
+  print(result?.data);
+  print(result?.historyMessage);
+  showDialog(
+    context: parentContext,
+    builder: (BuildContext context) {
+      return MatrixLatex(label: operation, latexText: result.getMathJexText(parentheses: "square"));
+    }
+  );
+}
+
 //  TODO
-Card buildCard(
-    {Key key,
-    MatrixOperation widget,
-    BuildContext context,
-    Map<String, Matrix> data}) {
+Card buildCard({Key key, MatrixOperation widget, BuildContext parentContext, Map<String, Matrix> data}) {
   return Card(
     elevation: 3,
     child: Column(
@@ -76,10 +94,9 @@ Card buildCard(
         ListTile(
           title: Text(widget.name),
           subtitle: Text('${widget.description}'),
-          //  TODO: BUILD DIALOG
           onTap: () => {
             showDialog(
-                context: context,
+                context: parentContext,
                 builder: (BuildContext context) {
                   print('Operation ${widget.name} called');
                   print(data);
@@ -88,7 +105,12 @@ Card buildCard(
                     name: widget.name,
                     singleOperation: widget.singleOperation,
                     needMatrix: widget.needMatrix,
-                    data: data
+                    data: data,
+                    callback: (String matrix_1, String matrix_2, double scalar_2, String operation) {
+                      //  TODO: Chain this up back to calculator.dart(?) FINISH THIS TO SHOW RESULT OF OPERATION!
+                      Navigator.pop(context);
+                      showResult(matrix_1, matrix_2, scalar_2, operation, data, parentContext);
+                    },
                   );
                 })
           },
@@ -97,87 +119,3 @@ Card buildCard(
     ),
   );
 }
-
-final List<MatrixOperation> MatrixOperations = <MatrixOperation>[
-  MatrixOperation(
-      'Addition',
-      CustomIcon.plus,
-      Colors.yellow,
-      Colors.green,
-      false,
-      true,
-      'add',
-      'Perform addition of Matrix 1 + Matrix 2. Dimension of both Matrixes must be exactly the same'),
-  MatrixOperation(
-      'Substraction',
-      CustomIcon.minus,
-      Colors.yellow,
-      Colors.blue,
-      false,
-      true,
-      'sub',
-      'Perform subtraction of Matrix 1 - Matrix 2. Dimension of both Matrixes must be exactly the same'),
-  MatrixOperation(
-      'Matrix Multiplication',
-      CustomIcon.asterisk,
-      Colors.green[200],
-      Colors.red,
-      false,
-      true,
-      'mmult',
-      'Perform multiplication of a Matrix 1 * Matrix 2. Dimension of both Matrixes must obey m x n * n x k.'),
-  MatrixOperation(
-      'Scalar Multiplication',
-      CustomIcon.cancel,
-      Colors.green[200],
-      Colors.cyan,
-      false,
-      false,
-      'smult',
-      'Perform scalar multiplication of Matrix * Decimal Number'),
-  MatrixOperation(
-      'Power',
-      CustomIcon.angle_up,
-      Colors.blue[300],
-      Colors.yellow[700],
-      false,
-      false,
-      'pow',
-      'Perform power operation. Example would be (Matrix 1)^(Integer Power). A power of -1 will be calculating its inverse.'),
-  MatrixOperation(
-      'Determinant',
-      CustomIcon.eject,
-      Colors.blue[300],
-      Colors.orange,
-      true,
-      false,
-      'det',
-      'Calculate the determinant of the given Matrix. Given Matrix must be a square Matrix'),
-  MatrixOperation(
-      'Inverse',
-      CustomIcon.info,
-      Colors.green[100],
-      Colors.pink,
-      true,
-      false,
-      'inv',
-      'Calculate the inverse of the given Matrix. Given Matrix must be a square Matrix'),
-  MatrixOperation(
-      'Row Echelon Form',
-      CustomIcon.yandex,
-      Colors.teal[200],
-      Colors.teal,
-      true,
-      false,
-      'RE',
-      'Calculate the Row Echelon Form (RE) of the given Matrix.'),
-  MatrixOperation(
-      'Reduced Row Echelon Form',
-      CustomIcon.calc,
-      Colors.deepPurple[200],
-      Colors.purple,
-      true,
-      false,
-      'RRE',
-      'Calculate the Reduced Row Echelon Form (RRE) of the given Matrix')
-];
