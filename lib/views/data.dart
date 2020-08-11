@@ -6,7 +6,8 @@ import '../dialog/matrix_latex.dart';
 
 class DataPage extends StatefulWidget {
   final Map<String, Matrix> data;
-  const DataPage({Key key, this.data}) : super(key: key);
+  final int precision;
+  const DataPage({Key key, this.data, this.precision}) : super(key: key);
   @override
   _DataPageState createState() => _DataPageState();
 }
@@ -73,7 +74,7 @@ class _DataPageState extends State<DataPage> {
                                 String matrixLatexText = this
                                     .widget
                                     .data[key]
-                                    .getMathJexText(parentheses: "square");
+                                    .getMathJexText(parentheses: "square", precision: widget.precision);
                                 return MatrixLatex(
                                     label: "Matrix $key", latexText: matrixLatexText);
                               });

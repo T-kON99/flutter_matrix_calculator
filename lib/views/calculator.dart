@@ -6,7 +6,8 @@ import '../operation.dart';
 
 class CalculatorPage extends StatefulWidget {
   final Map<String, Matrix> data;
-  const CalculatorPage({Key key, this.data}) : super(key: key);
+  final int precision;
+  const CalculatorPage({Key key, this.data, this.precision}) : super(key: key);
   @override
   _CalculatorPageState createState() => _CalculatorPageState();
 }
@@ -27,6 +28,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                 child: OperationFormView(
                   data: widget.data,
                   operation: this.operations[i],
+                  precision: widget.precision,
                 ),
               ),
             );
