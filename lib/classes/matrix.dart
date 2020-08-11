@@ -295,13 +295,11 @@ class Matrix {
 
   /// Matrix transpose
   Matrix operator ~() {
-    assert(this._size != null && this._row == this._col,
-        'Can not transpose a non-square matrix');
-    for (int i = 0; i < this._row; i++) {
-      for (int j = i + 1; j < this._col; j++) {
-        var temp = this._data[j][i];
-        this._data[j][i] = this._data[i][j];
-        this._data[i][j] = temp;
+    Matrix original = Matrix.copyFrom(this);
+    this.zeroFillResize(col: original._row, row: original._col);
+    for (int i = 0; i < original._row; i++) {
+      for (int j = 0; j < original._col; j++) {
+        this._data[j][i] = original._data[i][j];
       }
     }
     this._historyMessage.add('Transpose Matrix');
@@ -325,7 +323,7 @@ class Matrix {
     return out;
   }
 
-  String getMathJexText({String parentheses}) {
+  String getMathJexText({String parentheses, int precision = 3}) {
     final Map<String, String> tags = {
       "plain": "matrix",
       "round": "pmatrix",
@@ -336,7 +334,10 @@ class Matrix {
     };
     assert(tags.containsKey(parentheses), "Invalid type of parentheses.");
     String tag = tags[parentheses];
-    String latexMatrix = this.data.map((row) => row.join('&')).join(r'\\');
+    String latexMatrix = this.data.map((row) {
+      var temp = row.map((value) => value.toStringAsPrecision(precision));
+      return temp.join('&');
+    }).join(r'\\');
     String latexText = r"$$\begin""{$tag}""$latexMatrix"r"\end""{$tag}\$\$";
     return latexText;
   }
