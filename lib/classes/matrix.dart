@@ -256,6 +256,7 @@ class Matrix {
     }
     //  Matrix Multiplication, O(n^3) default algorithm
     else if (other is Matrix) {
+      assert(this._col == other._row, 'Dimension of the matrixes must obey matrix multiplication law which is m x n * n x k');
       result = Matrix.withSize(row: this._row, col: other._col);
       for (int i = 0; i < result._row; i++) {
         for (int j = 0; j < result._col; j++) {
@@ -312,7 +313,7 @@ class Matrix {
     assert(power >= -1,
         'Invalid power, can only perform positive power multiplication');
     //  Inverse Matrix
-    var out = Matrix(data: this._data);
+    var out = Matrix.copyFrom(this);
     if (power == -1) {
       return this.inv();
     } else {
