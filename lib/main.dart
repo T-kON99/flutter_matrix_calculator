@@ -15,21 +15,26 @@ class _MainState extends State<Main> {
 
   @override
   Widget build(BuildContext context) {
+    final pageController = PageController(initialPage: _curTabIndex);
     return MaterialApp(
         home: Scaffold(
       appBar: AppBar(
         title: Text('Matrix Calculator'),
       ),
       body: Builder(
-        builder: (context) => SafeArea(
-          top: false,
-          child: IndexedStack(
-            index: _curTabIndex,
-            children: Navigations.map<Widget>((NavTab tab) {
-              return TabView(tab: tab, data: this.data);
-            }).toList(),
-          ),
-        )
+        builder: (context) {
+          return SafeArea(
+            top: false,
+            child: PageView(
+              controller: pageController,
+              scrollDirection: Axis.horizontal,
+              children: Navigations.map<Widget>((NavTab tab) {
+                return TabView(tab: tab, data: this.data);
+              }).toList(),
+              onPageChanged: (index) => this.setState(() { _curTabIndex = index; }),
+            ),
+          );
+        }
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _curTabIndex,
@@ -41,6 +46,7 @@ class _MainState extends State<Main> {
           );
         }).toList(),
         onTap: (tabIndex) {
+          pageController.animateToPage(tabIndex, duration: Duration(milliseconds: 500), curve: Curves.ease);
           setState(() {
             _curTabIndex = tabIndex;
           });
