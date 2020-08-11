@@ -12,9 +12,10 @@ class NavTab {
 }
 
 class TabView extends StatefulWidget {
-  const TabView({Key key, this.tab, this.data}) : super(key: key);
+  const TabView({Key key, this.tab, this.data, this.precision}) : super(key: key);
   final NavTab tab;
   final Map<String, Matrix> data;
+  final int precision;
   @override
   _TabViewState createState() => _TabViewState();
 }
@@ -30,9 +31,9 @@ class _TabViewState extends State<TabView> {
   Widget build(BuildContext context) {
     switch(widget.tab.route) {
       case '/data':
-        return DataPage(data: widget.data);
+        return DataPage(key: PageStorageKey('data'), data: widget.data, precision: widget.precision);
       case '/calculator':
-        return CalculatorPage(data: widget.data);
+        return CalculatorPage(key: PageStorageKey('calculator'), data: widget.data, precision: widget.precision);
       default:
         return DataPage();
     }
