@@ -12,6 +12,7 @@ class Main extends StatefulWidget {
 class _MainState extends State<Main> {
   int _curTabIndex = 0;
   Map<String, Matrix> data = {};
+  int precision = 6;
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,7 @@ class _MainState extends State<Main> {
               controller: pageController,
               scrollDirection: Axis.horizontal,
               children: Navigations.map<Widget>((NavTab tab) {
-                return TabView(tab: tab, data: this.data);
+                return TabView(tab: tab, data: this.data, precision: this.precision);
               }).toList(),
               onPageChanged: (index) => this.setState(() { _curTabIndex = index; }),
             ),
