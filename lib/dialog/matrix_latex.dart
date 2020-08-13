@@ -20,9 +20,16 @@ class _MatrixLatexState extends State<MatrixLatex> {
       actions: widget.actions,
       content: Container(
         child: TeXView(
-          teXHTML: this.widget.latexText,
-          renderingEngine: RenderingEngine.Katex, // Katex for fast render and MathJax for quality render.
-          loadingWidget: Center(
+          child: TeXViewColumn(
+            id: "matrix_latex",
+            children: [
+              TeXViewColumn(children: [
+                TeXViewDocument(this.widget.latexText, style: TeXViewStyle(textAlign: TeXViewTextAlign.Center)),
+              ]),
+            ]
+          ),
+          renderingEngine: TeXViewRenderingEngine.katex(), // Katex for fast render and MathJax for quality render.
+          loadingWidgetBuilder: (BuildContext context) => Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               mainAxisSize: MainAxisSize.min,
@@ -36,9 +43,6 @@ class _MatrixLatexState extends State<MatrixLatex> {
           onRenderFinished: (height) {
             print("Widget Height is : $height");
             this.setState(() => _height = height);
-          },
-          onPageFinished: (string) {
-            print("Page Loading finished");
           },
         ),
         height: _height + 11,
