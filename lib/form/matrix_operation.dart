@@ -73,7 +73,7 @@ void showResult(String matrix_1, String matrix_2, double scalar_2, Operation ope
     output = r"$$" "${result.det().toStringAsPrecision(precision)}" r"$$";
   }
   else {
-    output = result.getMathJexText(parentheses: "square");
+    output = result.getMathJexText(parentheses: "square", precision: precision);
   }
   showDialog(
     context: parentContext,
