@@ -160,7 +160,7 @@ class _CalculateFormViewState extends State<CalculateFormView> {
       Operation.SCALAR_MULT: () => true,
       Operation.POW: () => widget.data[givenMatrix].isSquare(),
       Operation.DET: () => widget.data[givenMatrix].isSquare(),
-      Operation.INV: () => widget.data[givenMatrix].isSquare(),
+      Operation.INV: () => widget.data[givenMatrix].isSquare() && widget.data[givenMatrix].det() != 0,
       Operation.RE: () => true,
       Operation.RRE: () => true,
     };
