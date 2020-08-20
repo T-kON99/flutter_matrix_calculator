@@ -14,7 +14,8 @@ class DataPage extends StatefulWidget {
 
 class _DataPageState extends State<DataPage> {
   //  Helper function to show matrix dialog
-  void showMatrixDialog({BuildContext context, Matrix matrix, String matrixName}) {
+  void showMatrixDialog({BuildContext context, Matrix matrix, String matrixName, BuildContext scaffoldContext}) {
+    Matrix oldMatrix = Matrix.copyFrom(matrix);
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -33,6 +34,22 @@ class _DataPageState extends State<DataPage> {
                     }
                     this.widget.data[name] = matrix;
                   });
+                  if (scaffoldContext != null) {
+                    Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
+                      content: Text('Updated Matrix $name'),
+                      duration: Duration(seconds: 2),
+                      action: SnackBarAction(
+                        label: "Undo",
+                        onPressed: () => this.setState(() {
+                          this.widget.data.remove(name);
+                          if (matrixName.isNotEmpty && matrixName != null)
+                            this.widget.data[matrixName] = oldMatrix;
+                        }),
+                      ),
+                      // backgroundColor: Colors.blue,
+                      // shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                    ));
+                  }
                   print('Added to MatrixMap Matrix $name: ${this.widget.data[name].data}');
                 },
               ),
@@ -72,70 +89,19 @@ class _DataPageState extends State<DataPage> {
                               context: context,
                               builder: (BuildContext context) {
                                 String matrixLatexText = this
-                                    .widget
-                                    .data[key]
-                                    .getMathJexText(parentheses: "square", precision: widget.precision);
+                                  .widget
+                                  .data[key]
+                                  .getMathJexText(
+                                      parentheses: "square",
+                                      precision: widget.precision);
                                 return MatrixLatex(
-                                    label: "Matrix $key", latexText: matrixLatexText);
+                                  label: "Matrix $key",
+                                  latexText: matrixLatexText
+                                );
                               });
                         },
                         onLongPress: () {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) {
-                              return SimpleDialog(
-                                title: Text('Matrix $key'),
-                                children: <Widget>[
-                                  SimpleDialogOption(
-                                    child: Text('Edit'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      showMatrixDialog(
-                                          context: context,
-                                          matrix: this.widget.data[key],
-                                          matrixName: key);
-                                    },
-                                  ),
-                                  SimpleDialogOption(
-                                    child: Text('Delete'),
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                      showDialog(
-                                          context: context,
-                                          builder: (BuildContext context) {
-                                            return AlertDialog(
-                                              title: Text('Confirm Delete'),
-                                              actions: <Widget>[
-                                                FlatButton(
-                                                  child: Text('Yes'),
-                                                  onPressed: () {
-                                                    Matrix toDelete = this.widget.data[key];
-                                                    this.setState(() => this
-                                                        .widget
-                                                        .data
-                                                        .remove(key));
-                                                    //  Display snackbar informing user, allowing user to undo
-                                                    Scaffold.of(scaffoldContext).showSnackBar(
-                                                      SnackBar(
-                                                        content: Text('Deleted Matrix $key'),
-                                                        duration: Duration(seconds: 2),
-                                                        action: SnackBarAction(label: "Undo", onPressed: () => this.setState(() => this.widget.data[key] = toDelete),),
-                                                        // backgroundColor: Colors.blue,
-                                                        // shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
-                                                      )
-                                                    );
-                                                    Navigator.pop(context);
-                                                  },
-                                                )
-                                              ],
-                                            );
-                                          });
-                                    },
-                                  )
-                                ],
-                              );
-                            },
-                          );
+                          showLongPressDialog(context, key, scaffoldContext);
                         },
                       )
                     ],
@@ -143,20 +109,87 @@ class _DataPageState extends State<DataPage> {
                 ),
               );
             },
-        );
+          );
       }),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           showMatrixDialog(
-              context: context,
-              matrix: Matrix(data: [
+            context: context,
+            matrix: Matrix(
+              data: [
                 [0]
-              ]));
+              ],
+            ),
+          );
         },
         elevation: 5,
         child: Icon(Icons.add),
         tooltip: "Add a new Matrix",
       ),
+    );
+  }
+
+  void showLongPressDialog(BuildContext context, String key, BuildContext scaffoldContext) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return SimpleDialog(
+          title: Text('Matrix $key'),
+          children: <Widget>[
+            SimpleDialogOption(
+              child: Text('Edit'),
+              onPressed: () {
+                Navigator.pop(context);
+                showMatrixDialog(
+                    context: context,
+                    matrix: this.widget.data[key],
+                    matrixName: key,
+                    scaffoldContext: scaffoldContext
+                );
+              },
+            ),
+            SimpleDialogOption(
+              child: Text('Delete'),
+              onPressed: () {
+                Navigator.pop(context);
+                confirmDeleteDialog(context, key, scaffoldContext);
+              },
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void confirmDeleteDialog(BuildContext context, String key, BuildContext scaffoldContext) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Confirm Delete'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Yes'),
+                onPressed: () {
+                  Matrix toDelete = this.widget.data[key];
+                  this.setState(() => this.widget.data.remove(key));
+                  //  Display snackbar informing user, allowing user to undo
+                  Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
+                    content: Text('Deleted Matrix $key'),
+                    duration: Duration(seconds: 2),
+                    action: SnackBarAction(
+                      label: "Undo",
+                      onPressed: () => this.setState(() => this.widget.data[key] = toDelete),
+                    ),
+                    // backgroundColor: Colors.blue,
+                    // shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+                  ));
+                  Navigator.pop(context);
+                },
+              )
+            ],
+          );
+        }
     );
   }
 }
