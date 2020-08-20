@@ -63,8 +63,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                         if (_formKey.currentState.validate()) {
                           _formKey.currentState.save();
                           print('Saving Matrix ${matrixNameController.text}');
-                          this.widget.callback(
-                              this.widget.matrix, matrixNameController.text);
+                          this.widget.callback(this.widget.matrix, matrixNameController.text);
                           Navigator.pop(context);
                         }
                       },
@@ -81,7 +80,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                     labelText: 'Matrix Name',
                     hintText: 'Enter a Unique variable name'),
                 maxLength: 10,
-                validator: (name) {
+                validator: (String name) {
                   if (name.isEmpty) {
                     return 'Please enter matrix name';
                   }
