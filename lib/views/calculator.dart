@@ -29,6 +29,7 @@ class _CalculatorPageState extends State<CalculatorPage> {
                   data: widget.data,
                   operation: this.operations[i],
                   precision: widget.precision,
+                  resultMatrixName: 'ans',
                 ),
               ),
             );
