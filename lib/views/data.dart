@@ -27,7 +27,6 @@ class _DataPageState extends State<DataPage> {
                 matrixName: matrixName,
                 callback: (Matrix matrix, String name) {
                   this.setState(() {
-                    //  TODO: SNACKBAR HERE
                     if (name != matrixName) {
                       print('Updated Matrix $matrixName to $name');
                       this.widget.data.remove(matrixName);

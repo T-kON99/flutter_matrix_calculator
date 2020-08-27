@@ -49,7 +49,6 @@ class _OperationFormViewState extends State<OperationFormView> {
     );
   }
 
-  //  TODO
   Card buildCard({Key key, MatrixOperation matrixOperation, BuildContext parentContext, Map<String, Matrix> data, int precision}) {
     return Card(
       elevation: 3,
@@ -92,7 +91,6 @@ class _OperationFormViewState extends State<OperationFormView> {
             needMatrix: matrixOperation.needMatrix,
             data: data,
             callback: (String matrix_1, String matrix_2, double scalar_2, Operation operation, bool showSteps) {
-              //  TODO: Chain this up back to calculator.dart(?) FINISH THIS TO SHOW RESULT OF OPERATION!
               Navigator.pop(context);
               showResult(matrix_1, matrix_2, scalar_2, operation, data, showSteps, precision, parentContext);
             },

@@ -12,7 +12,6 @@ class CalculatorPage extends StatefulWidget {
   _CalculatorPageState createState() => _CalculatorPageState();
 }
 
-//  TODO: FINISH IMPLEMENTING CALCULATOR PAGE
 //  1.  Have preset of functions available which user can select (Ex: Add, Multiplication, Inverse, GE, RE, RRE)
 //  2.  If (1) finishes, maybe let another field which is "Custom". This will behave like MATLAB (Ex: Users able to input: det(mat(A)*mat(B))
 class _CalculatorPageState extends State<CalculatorPage> {
