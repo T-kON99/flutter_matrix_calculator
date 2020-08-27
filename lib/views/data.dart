@@ -149,6 +149,13 @@ class _DataPageState extends State<DataPage> {
               },
             ),
             SimpleDialogOption(
+              child: Text('Duplicate'),
+              onPressed: () {
+                Navigator.pop(context);
+                duplicateDialog(context, key, scaffoldContext, this.widget.data);
+              },
+            ),
+            SimpleDialogOption(
               child: Text('Delete'),
               onPressed: () {
                 Navigator.pop(context);
@@ -159,6 +166,22 @@ class _DataPageState extends State<DataPage> {
         );
       },
     );
+  }
+
+  void duplicateDialog(BuildContext context, String key, BuildContext scaffoldContext, Map<String, Matrix> data) {
+    String newMatrixName = key;
+    while (data.containsKey(newMatrixName)) {
+      newMatrixName = 'Copy_$newMatrixName';
+    }
+    data[newMatrixName] = Matrix.copyFrom(data[key]);
+    Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
+      content: Text('Duplicated Matrix $key to Matrix $newMatrixName'),
+      duration: Duration(seconds: 2),
+      action: SnackBarAction(
+        label: 'Undo',
+        onPressed: () => this.setState(() => this.widget.data.remove(newMatrixName)),
+      ),
+    ));
   }
 
   void confirmDeleteDialog(BuildContext context, String key, BuildContext scaffoldContext) {
