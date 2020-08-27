@@ -35,12 +35,12 @@ class _CalculateFormViewState extends State<CalculateFormView> {
         contentPadding: EdgeInsets.all(0),
         actions: <Widget>[
           //  TODO: Finish actions
-          FlatButton(
-            child: Text('Chain'),
-            onPressed: () {
-              print('Do we need this? Chain!');
-            },
-          ),
+          // FlatButton(
+          //   child: Text('Chain'),
+          //   onPressed: () {
+          //     print('Do we need this? Chain!');
+          //   },
+          // ),
           FlatButton(
             child: Text('Calculate'),
             onPressed: () {
