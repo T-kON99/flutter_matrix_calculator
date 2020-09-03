@@ -137,14 +137,14 @@ class _CalculateFormViewState extends State<CalculateFormView> {
           ),
         ];
       }
-      bool curShowSteps = showSteps;
-      secondResult.add(CheckboxListTile(
-        value: showSteps,
-        onChanged: (val) => this.setState(() { showSteps = !curShowSteps; }),
-        title: Text('Show Steps', style: TextStyle(color: Colors.grey),),
-      ));
       result.addAll(secondResult);
     }
+    bool curShowSteps = showSteps;
+    result.add(CheckboxListTile(
+      value: showSteps,
+      onChanged: (val) => this.setState(() { showSteps = !curShowSteps; }),
+      title: Text('Show Steps', style: TextStyle(color: Colors.grey),),
+    ));
     return result;
   }
 
