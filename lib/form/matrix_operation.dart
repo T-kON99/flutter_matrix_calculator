@@ -111,10 +111,10 @@ class _OperationFormViewState extends State<OperationFormView> {
     String output;
     Matrix result = this.calculateHandler[operation](m1, m2, s);
     if (operation == Operation.DET) {
-      output = r"$$" "${result.det().toStringAsPrecision(precision)}" r"$$";
+      output = r"$$\textbf{Multiplying Diagonals}$$ $$""${result.det().toStringAsPrecision(precision)}"r"$$";
     }
     else {
-      output = result.getMathJexText(parentheses: "square", precision: precision);
+      output = r"$$\textbf{Final Result}$$" + result.getMathJexText(parentheses: "square", precision: precision);
     }
     //  Save intermediate result to a matrix called result just like in matlab.
     this.setState(() {
@@ -127,7 +127,8 @@ class _OperationFormViewState extends State<OperationFormView> {
   void showResult(String matrix_1, String matrix_2, double scalar_2, Operation operation, Map<String, Matrix> data, bool showSteps, int precision, BuildContext parentContext) {
     String output = calculate(matrix_1, matrix_2, scalar_2, operation, data, precision);
     Matrix result = data[widget.resultMatrixName];
-    String label = '${operation.fullName} of $matrix_1' + matrix_2 == null ? (scalar_2 == null ? '' : 'and $scalar_2') : 'and $matrix_2';
+    String label = '${operation.fullName} ($matrix_1' + (matrix_2 == null ? (scalar_2 == null ? '' : ', $scalar_2') : ', $matrix_2') + ')';
+    print(result.historyMessage);
     showDialog(
       context: parentContext,
       builder: (BuildContext context) {
@@ -148,7 +149,22 @@ class _OperationFormViewState extends State<OperationFormView> {
               )
             ],
           );
-        return MatrixLatex(label: label, latexText: "Showing Steps");
+        return MatrixLatex(
+          label: label, 
+          latexText: result.getHistoryText() + output,
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Save'),
+              onPressed: () {
+                showNewDialog(
+                  parentContext: parentContext, 
+                  context: context, 
+                  builder: (BuildContext context) => saveMatrixDialog(this._formKey, result, context)
+                );
+              }
+            )
+          ]
+        );
       }
     );
   }

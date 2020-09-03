@@ -1,3 +1,5 @@
+import 'package:tuple/tuple.dart';
+
 class Matrix {
   int _row, _col, _size;
   List<List<double>> _data;
@@ -55,6 +57,11 @@ class Matrix {
     this._data = newData;
   }
 
+  void _copyHistory(Matrix other) {
+    this._historyMessage = new List<String>.from(other._historyMessage);
+    this._historyState = new List<Matrix>.from(other._historyState);
+  }
+
   /// Determinant of a matrix
   double det() {
     if(!this.isSquare()) throw('A non-square matrix has no determinant value');
@@ -78,13 +85,13 @@ class Matrix {
           for (int n = 0; n < this._col; n++) {
             out._data[i - 1][n] = out._data[i - 1][n] + out._data[i][n];
           }
-          out._historyMessage.add('Element at \$(Row_{$i}, Col_{${j+1}})\$ is 0, perform Elementary Row Operation \$R_{$i} = R_{$i} + R_{${i+1}}\$');
+          out._historyMessage.add('Element at \$\$(Row_{$i}, Col_{${j+1}}) = 0\$\$. Perform Elementary Row Operation \$\$R_{$i} = R_{$i} + R_{${i+1}}\$\$');
           out._historyState.add(Matrix.copyFrom(out));
         }
 
         //  Step 2
         //  Get the ratio if applicable (non zero value, otherwise will result in dividing by 0)
-        out._historyMessage.add('Get Ratio of element at \$Col_{${j+1}}\$ which is \$frac{R_{${i+1}}}{R_{$i}}\$');
+        out._historyMessage.add('Get Ratio of element at \$\$(R_{${i+1}}, Col_{${j+1}}) = \\frac{R_{${i+1}}}{R_{$i}}\$\$');
         out._historyState.add(Matrix.copyFrom(out));
         if (out._data[i - 1][j] != 0)
           ratio = out._data[i][j] / out._data[i - 1][j];
@@ -96,7 +103,7 @@ class Matrix {
         for (int n = 0; n < this._col; n++) {
           out._data[i][n] = out._data[i][n] - (ratio * out._data[i - 1][n]);
         }
-        out._historyMessage.add('Perform Elementary Row Operation at \$R_{${i + 1}} = R_{${i + 1}} - ($ratio * R_{$i})\$');
+        out._historyMessage.add('Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - ($ratio * R_{$i})\$\$');
         out._historyState.add(Matrix.copyFrom(out));
       }
     }
@@ -114,7 +121,7 @@ class Matrix {
             //Fixes floating point problem. Ex : 0 * -0.333333 returns -0 instead of 0.
             if (this._data[i][n].abs() < _epsilon) this._data[i][n] = 0;
           }
-          this._historyMessage.add('Normalizing \$Row_{${i+1}}\$. Multiply row by $ratio to make element at \$(Row_{${i+1}}, Col_{${j+1}})\$ into 1');
+          this._historyMessage.add('Normalizing \\(Row_{${i+1}}\\).<br>Multiply row by \\($ratio\\) to make element at \$\$(Row_{${i+1}}, Col_{${j+1}})\$\$ into 1');
           this._historyState.add(Matrix.copyFrom(this));
           break;
         }
@@ -147,7 +154,7 @@ class Matrix {
                 out._data[rowThis][n] = out._data[rowThis][n] - temp;
               }
             }
-            out._historyMessage.add('Perform Gaussian Elimination on the pivots which is on \$(Row_{${i+1}}, Col_{${k+1}})\$');
+            out._historyMessage.add('Perform Gaussian Elimination on the pivots which is on \$\$(Row_{${i+1}}, Col_{${k+1}})\$\$');
             out._historyState.add(Matrix.copyFrom(out));
             break;
           }
@@ -188,14 +195,14 @@ class Matrix {
             }
           }
         }
-        this._historyMessage.add('Get cofactor matrix by excluding \$Row_{${rowIndex+1}}\$ and \$Col_{${colIndex+1}}\$');
+        this._historyMessage.add('Get cofactor matrix by excluding \\(Row_{${rowIndex+1}}\\) and \\(Col_{${colIndex+1}}\\)');
         this._historyState.add(Matrix.copyFrom(output));
         this._data[rowIndex][colIndex] = output.det();
-        this._historyMessage.add('Element \$(Row_{${rowIndex+1}}, Col_{${colIndex+1}})\$ has the value of the determinant of cofactor.');
+        this._historyMessage.add('Element \\((Row_{${rowIndex+1}}, Col_{${colIndex+1}})\\) has the value of the determinant of cofactor.');
         this._historyState.add(Matrix.copyFrom(this));
         if ((rowIndex + colIndex) % 2 == 1)
           this._data[rowIndex][colIndex] = this._data[rowIndex][colIndex] * -1;
-        this._historyMessage.add('Multiply by -1 when Index of (Row + Col) = \$(${rowIndex+1} + ${colIndex+1})\$ is not divisible by 2');
+        this._historyMessage.add('Multiply by -1 when Index of \$\$(Row_{${rowIndex+1}}, Col_{${colIndex+1}}) = ${rowIndex+1} + ${colIndex+1}\$\$ is not divisible by 2');
         this._historyState.add(Matrix.copyFrom(this));
       }
     }
@@ -234,7 +241,7 @@ class Matrix {
         assert(this._data[i][j] != null && other._data[i][j] != null,
             'Invalid null type in addition');
         result._data[i][j] = this._data[i][j] + other._data[i][j];
-        result._historyMessage.add('Add element at position \$(Row_{${i+1}}, Col_{${j+1}}) => ${this._data[i][j]} + ${other._data[i][j]} = ${result._data[i][j]}\$');
+        result._historyMessage.add('Add element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} + ${other._data[i][j]} = ${result._data[i][j]}\$\$');
         result._historyState.add(Matrix.copyFrom(result));
       }
     }
@@ -249,7 +256,7 @@ class Matrix {
       for (int i = 0; i < _row; i++) {
         for (int j = 0; j < _col; j++) {
           result._data[i][j] = other * _data[i][j];
-          result._historyMessage.add('Multiply $other with element at \$(Row_{${i+1}}, Col_{${j+1}}) => $other * ${_data[i][j]} = ${result._data[i][j]}\$');
+          result._historyMessage.add('Multiply \\($other\\) with element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = $other * ${_data[i][j]} = ${result._data[i][j]}\$\$');
           result._historyState.add(Matrix.copyFrom(result));
         }
       }
@@ -258,13 +265,14 @@ class Matrix {
     else if (other is Matrix) {
       assert(this._col == other._row, 'Dimension of the matrixes must obey matrix multiplication law which is m x n * n x k');
       result = Matrix.withSize(row: this._row, col: other._col);
+      result._copyHistory(this);
       for (int i = 0; i < result._row; i++) {
         for (int j = 0; j < result._col; j++) {
           result._data[i][j] = 0;
           for (int k = 0; k < this._col; k++) {
             result._data[i][j] += this._data[i][k] * other._data[k][j];
           }
-          result._historyMessage.add('Perform a dot product on First Matrix \$Row_{${i+1}}\$ & Second Matrix \$Col_{${j+1}}\$, result will be element at \$(Row_{${i+1}}, Col_{${j+1}})\$');
+          result._historyMessage.add('Perform a dot product on First Matrix\'s \\(Row_{${i+1}}\\) and Second Matrix\'s \\(Col_{${j+1}}\\). <br>Result will be element at \\((Row_{${i+1}}, Col_{${j+1}})\\)');
           result._historyState.add(Matrix.copyFrom(result));
         }
       }
@@ -287,7 +295,7 @@ class Matrix {
         assert(this._data[i][j] != null && other._data[i][j] != null,
             'Invalid null type in addition');
         result._data[i][j] = this._data[i][j] - other._data[i][j];
-        result._historyMessage.add('Subtract element at position \$(Row_{${i+1}}, Col_{${j+1}}) => ${this._data[i][j]} - ${other._data[i][j]} = ${result._data[i][j]}\$');
+        result._historyMessage.add('Subtract element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} - ${other._data[i][j]} = ${result._data[i][j]}\$\$');
         result._historyState.add(Matrix.copyFrom(result));
       }
     }
@@ -324,7 +332,7 @@ class Matrix {
     return out;
   }
 
-  String getMathJexText({String parentheses, int precision = 3}) {
+  String getMathJexText({String parentheses = 'square', int precision = 3, int highlightRow, int highlightCol}) {
     final Map<String, String> tags = {
       "plain": "matrix",
       "round": "pmatrix",
@@ -335,11 +343,23 @@ class Matrix {
     };
     assert(tags.containsKey(parentheses), "Invalid type of parentheses.");
     String tag = tags[parentheses];
-    String latexMatrix = this.data.map((row) {
-      var temp = row.map((value) => value.toStringAsPrecision(precision));
-      return temp.join('&');
-    }).join(r'\\');
+    String latexMatrix = this.data.asMap().map((rowIndex, row) {
+      var temp = row.asMap().map((colIndex, value) {
+        String newValue = value?.toStringAsPrecision(precision);
+        return MapEntry(colIndex, rowIndex == highlightRow && colIndex == highlightCol ? r"\colorbox{yellow}{""$newValue""}" : newValue);
+      }).values;
+      return MapEntry(rowIndex, temp.join('&'));
+    }).values.join(r'\\');
     String latexText = r"$$\begin""{$tag}""$latexMatrix"r"\end""{$tag}\$\$";
     return latexText;
+  }
+
+  String getHistoryText() {
+    String result = "";
+    for(int i = 0; i < this._historyMessage.length; i++) {
+      result += "\\(${i+1}. \\)" + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText() + '\n';
+    }
+    result += "Operation Result""\n" + this.getMathJexText() + '\n';
+    return result;
   }
 }
