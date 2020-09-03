@@ -127,12 +127,13 @@ class _OperationFormViewState extends State<OperationFormView> {
   void showResult(String matrix_1, String matrix_2, double scalar_2, Operation operation, Map<String, Matrix> data, bool showSteps, int precision, BuildContext parentContext) {
     String output = calculate(matrix_1, matrix_2, scalar_2, operation, data, precision);
     Matrix result = data[widget.resultMatrixName];
+    String label = '${operation.fullName} of $matrix_1' + matrix_2 == null ? (scalar_2 == null ? '' : 'and $scalar_2') : 'and $matrix_2';
     showDialog(
       context: parentContext,
       builder: (BuildContext context) {
         if (!showSteps)
           return MatrixLatex(
-            label: '${operation.shortName}($matrix_1, $matrix_2 | $scalar_2)', 
+            label: label, 
             latexText: output, 
             actions: <Widget>[
               FlatButton(
@@ -147,7 +148,7 @@ class _OperationFormViewState extends State<OperationFormView> {
               )
             ],
           );
-        return MatrixLatex(label: '${operation.shortName}($matrix_1, $matrix_2 | $scalar_2)', latexText: "Showing Steps");
+        return MatrixLatex(label: label, latexText: "Showing Steps");
       }
     );
   }
