@@ -5,6 +5,8 @@ class Matrix {
   List<List<double>> _data;
   List<String> _historyMessage;
   List<Matrix> _historyState;
+  List<Tuple2<int, int>> _historyHighlight;
+  Tuple2<String, String> _historyMessageSymbol = Tuple2(r'$i', r'$j');
   static const _epsilon = 0.0000000000001;
 
   int get row => this._row;
@@ -13,6 +15,8 @@ class Matrix {
   List<List<double>> get data => this._data;
   List<String> get historyMessage => this._historyMessage;
   List<Matrix> get historyState => this._historyState;
+  List<Tuple2<int, int>> get historyHighlight => this._historyHighlight;
+  Tuple2<String, String> get historyMessageSymbol => this._historyMessageSymbol;
 
   /// Generate a 0-filled matrix with custom size.
   Matrix.withSize({int row, int col}) {
@@ -20,6 +24,7 @@ class Matrix {
     this._col = col;
     this._historyMessage = [];
     this._historyState = [];
+    this._historyHighlight = [];
     this._data = new List.generate(_row, (_) => List<double>.generate(_col, (_) => null));
     this._size = this._row == this._col ? this._row : null;
   }
@@ -30,6 +35,7 @@ class Matrix {
     this._col = this._data[0].length;
     this._historyMessage = [];
     this._historyState = [];
+    this._historyHighlight = [];
     this._size = this._row == this._col ? this._row : null;
   }
 
@@ -40,6 +46,7 @@ class Matrix {
         copy._data[i][j] = other._data[i][j];
     copy._historyMessage = new List<String>.from(other._historyMessage);
     copy._historyState = new List<Matrix>.from(other._historyState);
+    copy._historyHighlight = new List<Tuple2<int, int>>.from(other._historyHighlight);
     return copy;
   }
 
@@ -60,6 +67,20 @@ class Matrix {
   void _copyHistory(Matrix other) {
     this._historyMessage = new List<String>.from(other._historyMessage);
     this._historyState = new List<Matrix>.from(other._historyState);
+    this._historyHighlight = new List<Tuple2<int, int>>.from(other._historyHighlight);
+  }
+
+  //  This method will replace message $i with row from highlights value.
+  void historyAdd({String message, Matrix state, Tuple2<int, int> highlights}) {
+    int row = highlights.item1;
+    int col = highlights.item2;
+
+    message = message.replaceAll(this._historyMessageSymbol.item1, row.toString());
+    message = message.replaceAll(this._historyMessageSymbol.item2, col.toString());
+
+    this._historyMessage.add(message);
+    this._historyState.add(state);
+    this._historyHighlight.add(highlights);
   }
 
   /// Determinant of a matrix
@@ -87,12 +108,14 @@ class Matrix {
           }
           out._historyMessage.add('Element at \$\$(Row_{$i}, Col_{${j+1}}) = 0\$\$. Perform Elementary Row Operation \$\$R_{$i} = R_{$i} + R_{${i+1}}\$\$');
           out._historyState.add(Matrix.copyFrom(out));
+          out._historyHighlight.add(Tuple2(i, j + 1));
         }
 
         //  Step 2
         //  Get the ratio if applicable (non zero value, otherwise will result in dividing by 0)
-        out._historyMessage.add('Get Ratio of element at \$\$(R_{${i+1}}, Col_{${j+1}}) = \\frac{R_{${i+1}}}{R_{$i}}\$\$');
+        out._historyMessage.add('Get Ratio of element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = \\frac{R_{${i+1}}}{R_{$i}}\$\$');
         out._historyState.add(Matrix.copyFrom(out));
+        out._historyHighlight.add(Tuple2(i + 1, j + 1));
         if (out._data[i - 1][j] != 0)
           ratio = out._data[i][j] / out._data[i - 1][j];
         else
@@ -105,6 +128,7 @@ class Matrix {
         }
         out._historyMessage.add('Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - ($ratio * R_{$i})\$\$');
         out._historyState.add(Matrix.copyFrom(out));
+        out._historyHighlight.add(Tuple2(i + 1, j + 1));
       }
     }
     return out;
@@ -123,6 +147,7 @@ class Matrix {
           }
           this._historyMessage.add('Normalizing \\(Row_{${i+1}}\\).<br>Multiply row by \\($ratio\\) to make element at \$\$(Row_{${i+1}}, Col_{${j+1}})\$\$ into 1');
           this._historyState.add(Matrix.copyFrom(this));
+          this._historyHighlight.add(Tuple2(i + 1, j + 1));
           break;
         }
       }
@@ -156,6 +181,7 @@ class Matrix {
             }
             out._historyMessage.add('Perform Gaussian Elimination on the pivots which is on \$\$(Row_{${i+1}}, Col_{${k+1}})\$\$');
             out._historyState.add(Matrix.copyFrom(out));
+            out._historyHighlight.add(Tuple2(i + 1, k + 1));
             break;
           }
         }
@@ -197,13 +223,16 @@ class Matrix {
         }
         this._historyMessage.add('Get cofactor matrix by excluding \\(Row_{${rowIndex+1}}\\) and \\(Col_{${colIndex+1}}\\)');
         this._historyState.add(Matrix.copyFrom(output));
+        this._historyHighlight.add(Tuple2(null, null));
         this._data[rowIndex][colIndex] = output.det();
         this._historyMessage.add('Element \\((Row_{${rowIndex+1}}, Col_{${colIndex+1}})\\) has the value of the determinant of cofactor.');
         this._historyState.add(Matrix.copyFrom(this));
+        this._historyHighlight.add(Tuple2(rowIndex + 1, colIndex + 1));
         if ((rowIndex + colIndex) % 2 == 1)
           this._data[rowIndex][colIndex] = this._data[rowIndex][colIndex] * -1;
         this._historyMessage.add('Multiply by -1 when Index of \$\$(Row_{${rowIndex+1}}, Col_{${colIndex+1}}) = ${rowIndex+1} + ${colIndex+1}\$\$ is not divisible by 2');
         this._historyState.add(Matrix.copyFrom(this));
+        this._historyHighlight.add(Tuple2(rowIndex + 1, colIndex + 1));
       }
     }
     return this;
@@ -243,6 +272,7 @@ class Matrix {
         result._data[i][j] = this._data[i][j] + other._data[i][j];
         result._historyMessage.add('Add element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} + ${other._data[i][j]} = ${result._data[i][j]}\$\$');
         result._historyState.add(Matrix.copyFrom(result));
+        result._historyHighlight.add(Tuple2(i + 1, j + 1));
       }
     }
     return result;
@@ -258,6 +288,7 @@ class Matrix {
           result._data[i][j] = other * _data[i][j];
           result._historyMessage.add('Multiply \\($other\\) with element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = $other * ${_data[i][j]} = ${result._data[i][j]}\$\$');
           result._historyState.add(Matrix.copyFrom(result));
+          result._historyHighlight.add(Tuple2(i + 1, j + 1));
         }
       }
     }
@@ -274,6 +305,7 @@ class Matrix {
           }
           result._historyMessage.add('Perform a dot product on First Matrix\'s \\(Row_{${i+1}}\\) and Second Matrix\'s \\(Col_{${j+1}}\\). <br>Result will be element at \\((Row_{${i+1}}, Col_{${j+1}})\\)');
           result._historyState.add(Matrix.copyFrom(result));
+          result._historyHighlight.add(Tuple2(i + 1, j + 1));
         }
       }
     }
@@ -297,6 +329,7 @@ class Matrix {
         result._data[i][j] = this._data[i][j] - other._data[i][j];
         result._historyMessage.add('Subtract element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} - ${other._data[i][j]} = ${result._data[i][j]}\$\$');
         result._historyState.add(Matrix.copyFrom(result));
+        result._historyHighlight.add(Tuple2(i + 1, j + 1));
       }
     }
     return result;
@@ -313,6 +346,7 @@ class Matrix {
     }
     this._historyMessage.add('Transpose Matrix');
     this._historyState.add(Matrix.copyFrom(this));
+    this._historyHighlight.add(Tuple2(null, null));
     return this;
   }
 
@@ -332,7 +366,7 @@ class Matrix {
     return out;
   }
 
-  String getMathJexText({String parentheses = 'square', int precision = 3, int highlightRow, int highlightCol}) {
+  String getMathJexText({String parentheses = 'square', int precision = 3, String highlightColor = 'yellow', int highlightRow, int highlightCol}) {
     final Map<String, String> tags = {
       "plain": "matrix",
       "round": "pmatrix",
@@ -346,7 +380,7 @@ class Matrix {
     String latexMatrix = this.data.asMap().map((rowIndex, row) {
       var temp = row.asMap().map((colIndex, value) {
         String newValue = value?.toStringAsPrecision(precision);
-        return MapEntry(colIndex, rowIndex == highlightRow && colIndex == highlightCol ? r"\colorbox{yellow}{""$newValue""}" : newValue);
+        return MapEntry(colIndex, rowIndex == highlightRow && colIndex == highlightCol ? r"\colorbox{""$highlightColor}""{""$newValue""}" : newValue);
       }).values;
       return MapEntry(rowIndex, temp.join('&'));
     }).values.join(r'\\');
@@ -355,9 +389,13 @@ class Matrix {
   }
 
   String getHistoryText() {
+    assert(this._historyHighlight.length == this._historyMessage.length && this._historyMessage.length == this._historyState.length, "Size of history must match");
     String result = "";
+    print(this._historyHighlight);
     for(int i = 0; i < this._historyMessage.length; i++) {
-      result += "\\(${i+1}. \\)" + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText() + '\n';
+      int rowHighlight = this._historyHighlight[i].item1 == null ? null : this._historyHighlight[i].item1 - 1;
+      int colHighlight = this._historyHighlight[i].item2 == null ? null : this._historyHighlight[i].item2 - 1;
+      result += "\\(${i+1}. \\)" + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText(highlightRow: rowHighlight, highlightCol: colHighlight) + '\n';
     }
     result += "Operation Result""\n" + this.getMathJexText() + '\n';
     return result;
