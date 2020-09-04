@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix_calculator/classes/matrix.dart';
 import 'package:tuple/tuple.dart';
+import 'dart:math';
 
 void main() {
   test('Initializing a 1x1 matrix', () {
@@ -231,6 +232,26 @@ void main() {
       [0.4, 0.08, -0.11], 
       [-0.2, -0.04, 0.18]
     ]);
+  });
+
+  test('1000 inverse iterations of random 3x3 Matrix', () {
+    Random _random = new Random();
+    for(int i = 0; i < 1000; i++) {
+      final mat = Matrix(data: [
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100]
+      ]);
+      if (mat.det() != 0) {
+        Matrix invMat = mat.inv();
+        expect((mat * invMat).data, [
+          [moreOrLessEquals(1), moreOrLessEquals(0), moreOrLessEquals(0)],
+          [moreOrLessEquals(0), moreOrLessEquals(1), moreOrLessEquals(0)],
+          [moreOrLessEquals(0), moreOrLessEquals(0), moreOrLessEquals(1)],
+        ]);
+      }
+      else continue;
+    }
   });
 
   test('Latex text of 2x3 Matrix', () {
