@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:matrix_calculator/classes/matrix.dart';
+import 'package:tuple/tuple.dart';
 
 void main() {
   test('Initializing a 1x1 matrix', () {
@@ -299,5 +300,19 @@ void main() {
     print(matC.historyMessage);
     for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
     expect(matC.historyMessage.length, 12);
+  });
+
+  test('Internal Helper Function of _historyUpdate', () {
+    final matA = Matrix(data: [
+      [1, 2, 3],
+      [4, 5, 6],
+      [7, 8, 9]
+    ]);
+    matA.historyAdd(
+      message: 'Row ${matA.historyMessageSymbol.item1} and Col ${matA.historyMessageSymbol.item2}', 
+      state: Matrix(data: [[0]]), 
+      highlights: Tuple2(0, 0)
+    );
+    expect(matA.historyMessage[0], 'Row 0 and Col 0');
   });
 }
