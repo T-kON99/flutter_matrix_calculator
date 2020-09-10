@@ -30,6 +30,16 @@
 .pub/
 /build/
 
+# Key
+*.jks
+android/key.properties
+
+# bundletools
+bundletool*.jar
+
+# build
+apk/
+
 # Web related
 lib/generated_plugin_registrant.dart
 
