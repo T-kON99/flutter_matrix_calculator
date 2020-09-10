@@ -197,7 +197,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                               DataCell(
                                 TextFormField(
                                   controller: _controller,
-                                  keyboardType: TextInputType.number,
+                                  keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
                                   // initialValue: value.toString(),
                                   validator: (value) {
                                     if (value.isEmpty) {
