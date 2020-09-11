@@ -110,14 +110,14 @@ void main() {
     final matB = Matrix(data: [[2, 1, 0], [-4, 5, 1]]);
     final matRes = Matrix(data: [[3, 6, 3], [-1, 11, 2]]);
     expect((matA + matB).data, matRes.data);
-    print(matRes.data);
+    // print(matRes.data);
   });
 
   test('Matrix 2x2 Multiplication', () {
     final matA = Matrix(data: [[1, 3], [4, 6]]);
     final matB = Matrix(data: [[3, 6], [9, 1]]);
     expect((matA * matB).data, [[30, 9], [66, 30]]);
-    print((matA * matB).data);
+    // print((matA * matB).data);
   });
 
   test('Complex Matrix Arithmetic', () {
@@ -147,7 +147,7 @@ void main() {
       [3, 6, 8, 8]
     ]);
     final out = mat.gaussElimination();
-    print(out.data);
+    // print(out.data);
     for(int j = 0; j < out.col; j++)
       for(int i = out.row - 1; i > j; i--)
         expect(out.data[i][j], 0);
@@ -210,6 +210,41 @@ void main() {
     ]);
   });
 
+  test('Reduced Row Echelon Form of a 3x6 matrix extreme floating points', () {
+    final mat = Matrix(data: [
+      [37.10750265647809, 47.646290934711224, 38.43983786403484, 1.0, 0.0, 0.0], 
+      [80.02367239308013, 11.563476376052106, 11.603992200828216, 0.0, 1.0, 0.0], 
+      [96.0465225939978, 81.46671905291639, 66.86609947304328, 0.0, 0.0, 1.0]
+    ]);
+    expect(mat.getRRE().data, [
+      [1.0, 0.0, 0.0, moreOrLessEquals(0.5268642955619023), moreOrLessEquals(0.16636552479069672), moreOrLessEquals(-0.33175379638899666)],
+      [0.0, 1.0, 0.0, moreOrLessEquals(12.966482195227124), moreOrLessEquals(3.705914296000624), moreOrLessEquals(-8.097270187824103)],
+      [0.0, 0.0, 1.0, moreOrLessEquals(-16.554580785994926), moreOrLessEquals(-4.754090808755727), moreOrLessEquals(10.356845089591753)]
+    ]);
+  });
+
+    test('1000 Reduced Row Echelon Form iterations of random 3x6 Matrix extreme floating points', () {
+    Random _random = new Random();
+    for(int i = 0; i < 1000; i++) {
+      final mat = Matrix(data: [
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100]
+      ]);
+      if (mat.det() != 0) {
+        Matrix expanded = mat & Matrix.identity(size: mat.size);
+        Matrix rreMat = expanded.getRRE();
+        for(int i = 0; i < mat.size; i++) {
+          for(int j = 0; j < mat.size; j++) {
+            expect(rreMat.data[i][j], i == j ? moreOrLessEquals(1) : moreOrLessEquals(0));
+          }
+        }
+      }
+      else continue;
+    }
+  });
+
+
   test('Inverse of a 2x2 Matrix', () {
     final mat = Matrix(data: [
       [1, 4],
@@ -228,13 +263,13 @@ void main() {
       [0, 4, 8]
     ]);
     expect(mat.inv().data, [
-      [0.2, -0.16, -0.03], 
-      [0.4, 0.08, -0.11], 
-      [-0.2, -0.04, 0.18]
+      [moreOrLessEquals(0.2), moreOrLessEquals(-0.16), moreOrLessEquals(-0.03)], 
+      [moreOrLessEquals(0.4), moreOrLessEquals(0.08), moreOrLessEquals(-0.11)], 
+      [moreOrLessEquals(-0.2), moreOrLessEquals(-0.04), moreOrLessEquals(0.18)]
     ]);
   });
 
-  test('1000 inverse iterations of random 3x3 Matrix', () {
+  test('1000 inverse iterations of random 3x3 Matrix extreme floating points', () {
     Random _random = new Random();
     for(int i = 0; i < 1000; i++) {
       final mat = Matrix(data: [
@@ -276,12 +311,12 @@ void main() {
     ]);
     Matrix matC = matA + matB;
     Matrix matD = matA - matB;
-    print('Matrix matC');
+    // print('Matrix matC');
     print(matC.historyMessage);
-    for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
-    print('Matrix matD');
-    print(matD.historyMessage);
-    for(int i = 0; i < matD.historyState.length; i++) print(matD.historyState[i].data);
+    // for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
+    // print('Matrix matD');
+    // print(matD.historyMessage);
+    // for(int i = 0; i < matD.historyState.length; i++) print(matD.historyState[i].data);
     expect(matA.historyMessage.length, 0);
     expect(matA.historyState.length, 0);
     expect(matB.historyMessage.length, 0);
@@ -305,8 +340,8 @@ void main() {
     ]);
 
     Matrix matC = (matA * matB + matA) - matB;
-    print(matC.historyMessage);
-    for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
+    // print(matC.historyMessage);
+    // for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
     expect(matC.historyMessage.length, 27);
     expect(matC.historyState.length, 27);
   });
@@ -318,22 +353,90 @@ void main() {
       [4, 6, 3]
     ]);
     Matrix matC = matA.getRRE();
-    print(matC.historyMessage);
-    for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
+    // print(matC.historyMessage);
+    // for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
     expect(matC.historyMessage.length, 12);
   });
 
-  test('Internal Helper Function of _historyUpdate', () {
+  test('Concatenate 2 matrixes', () {
     final matA = Matrix(data: [
       [1, 2, 3],
-      [4, 5, 6],
-      [7, 8, 9]
+      [2, 4, 1],
+      [0, 1, 2]
     ]);
-    matA.historyAdd(
-      message: 'Row ${matA.historyMessageSymbol.item1} and Col ${matA.historyMessageSymbol.item2}', 
-      state: Matrix(data: [[0]]), 
-      highlights: Tuple2(0, 0)
-    );
-    expect(matA.historyMessage[0], 'Row 0 and Col 0');
+    final matB = Matrix(data: [
+      [2, 1],
+      [1, 1],
+      [9, 9]
+    ]);
+    expect((matA & matB).data, [
+      [1, 2, 3, 2, 1],
+      [2, 4, 1, 1, 1],
+      [0, 1, 2, 9, 9]
+    ]);
+  });
+
+  
+  test('Matrix concatenate history', () {
+        final matA = Matrix(data: [
+      [1, 2, 3],
+      [2, 4, 1],
+      [0, 1, 2]
+    ]);
+    final matB = Matrix(data: [
+      [2, 1],
+      [1, 1],
+      [9, 9]
+    ]);
+    expect((matA & matB).getHistoryText(),'\\(1. \\)Concatenate Matrix \$\$\\begin{bmatrix}2.00&1.00\\\\1.00&1.00\\\\9.00&9.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$ To get\n'
+      '\$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$\n'
+      'Operation Result\n'
+      '\$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$\n'
+      '');
+  });
+
+  test('Initiate Identity 2x2 Matrix', () {
+    final matA = Matrix.identity(size: 2);
+    expect(matA.data, [
+      [1, 0],
+      [0, 1]
+    ]);
+  });
+
+  test('1000 Iterations to confirm property of Identity Matrix', () {
+    final identity = Matrix.identity(size: 3);
+    Random _random = new Random();
+    for(int i = 0; i < 1000; i++) {
+      final mat = Matrix(data: [
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
+        [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100]
+      ]);
+      expect((mat * identity).data, mat.data);
+    }
+  });
+
+  test('Matrix Shift', () {
+    final mat = Matrix(data: [
+      [1, 2],
+      [2, 1]
+    ]);
+    expect(mat.shift(length: 1).data, [
+      [2],
+      [1]
+    ]);
+  });
+
+  
+  test('Matrix Shift History', () {
+    final mat = Matrix(data: [
+      [1, 2],
+      [2, 1]
+    ]);
+    expect(mat.shift(length: 1).getHistoryText(), '\\(1. \\)Shift matrix 1 to the right \$\$\\begin{bmatrix}1.00&2.00\\\\2.00&1.00\\end{bmatrix}\$\$ Deleting columns less than 1\n'
+      '\$\$\\begin{bmatrix}2.00\\\\1.00\\end{bmatrix}\$\$\n'
+      'Operation Result\n'
+      '\$\$\\begin{bmatrix}2.00\\\\1.00\\end{bmatrix}\$\$\n'
+    '');
   });
 }
