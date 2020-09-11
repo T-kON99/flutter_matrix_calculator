@@ -6,8 +6,6 @@ import '../operation.dart';
 import '../dialog/matrix_latex.dart';
 import '../utils.dart';
 
-//  TODO: Finish this form. HALFWAY
-
 class OperationFormView extends StatefulWidget {
   const OperationFormView({Key key, this.operation, this.data, this.precision, this.resultMatrixName}) : super(key: key);
   final MatrixOperation operation;
@@ -123,7 +121,6 @@ class _OperationFormViewState extends State<OperationFormView> {
     return output;
   }
 
-  //  TODO: FINISH THIS
   void showResult(String matrix_1, String matrix_2, double scalar_2, Operation operation, Map<String, Matrix> data, bool showSteps, int precision, BuildContext parentContext) {
     String output = calculate(matrix_1, matrix_2, scalar_2, operation, data, precision);
     Matrix result = data[widget.resultMatrixName];
