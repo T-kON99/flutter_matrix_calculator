@@ -4,6 +4,12 @@ import '../classes/matrix.dart';
 import '../form/matrix_form.dart';
 import '../dialog/matrix_latex.dart';
 
+class MatrixItem {
+  final String name;
+  final Matrix matrix;
+  MatrixItem({this.name, this.matrix});
+}
+
 class DataPage extends StatefulWidget {
   final Map<String, Matrix> data;
   final int precision;
@@ -13,8 +19,95 @@ class DataPage extends StatefulWidget {
 }
 
 class _DataPageState extends State<DataPage> {
+  final GlobalKey<AnimatedListState> _matrixListKey = GlobalKey();
+  final int _animateDuration_ms = 300;
+  List<MatrixItem> matrixList;
+
+  @override
+  void initState() {
+    super.initState();
+    this.matrixList = widget.data.entries.map((entry) => MatrixItem(name: entry.key, matrix: entry.value)).toList();
+  }
+
+  int addMatrix(Matrix matrix, String name) {
+    print('Before adding....');
+    print(widget.data);
+    int index;
+    this.setState(() {
+      index = this.widget.data.length;
+      this.widget.data[name] = matrix;
+      print('Added to MatrixMap Matrix $name: ${this.widget.data[name].data}');
+      _matrixListKey.currentState.insertItem(index, duration: Duration(milliseconds: _animateDuration_ms));
+    });
+    return index;
+  }
+
+  void deleteMatrix(String key, int index, BuildContext parentContext) {
+    this.setState(() {
+      _matrixListKey.currentState.removeItem(index, 
+        (context, animation) {
+          return FadeTransition(
+            opacity: CurvedAnimation(parent: animation, curve: Interval(0.5, 1.0)),
+            child: SizeTransition(
+              sizeFactor: CurvedAnimation(parent: animation, curve: Interval(0.0, 1.0)),
+              axisAlignment: 0.0,
+              child: _buildItem(key, index, parentContext),
+            ),
+          );
+        },
+        duration: Duration(milliseconds: _animateDuration_ms)
+      );
+      this.widget.data.remove(key);
+    });
+  }
+
+  void editMatrix(String oldName, String name, Matrix matrix, int index, BuildContext parentContext) {
+    deleteMatrix(oldName, index, parentContext);
+    addMatrix(matrix, name);
+  }
+
+  Widget _buildItem(String key, int index, BuildContext parentContext) {
+    return Center(
+      child: Card(
+        elevation: 3,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            ListTile(
+              key: ValueKey<String>(key),
+              leading: Icon(Icons.add_box),
+              title: Text(key),
+              subtitle: Text(
+                  '${widget.data[key]?.row}x${widget.data[key]?.col}'),
+              onTap: () {
+                showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      String matrixLatexText = this
+                        .widget
+                        .data[key]
+                        .getMathJexText(
+                            parentheses: "square",
+                            precision: widget.precision
+                        );
+                      return MatrixLatex(
+                        label: "Matrix $key",
+                        latexText: matrixLatexText
+                      );
+                    });
+              },
+              onLongPress: () {
+                showLongPressDialog(context, key, parentContext, index);
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   //  Helper function to show matrix dialog
-  void showMatrixDialog({BuildContext context, Matrix matrix, String matrixName, BuildContext scaffoldContext}) {
+  void showMatrixDialog({BuildContext context, Matrix matrix, String matrixName, BuildContext scaffoldContext, bool isNew, int index}) {
     Matrix oldMatrix = Matrix.copyFrom(matrix);
     showDialog(
         context: context,
@@ -25,14 +118,12 @@ class _DataPageState extends State<DataPage> {
               child: MatrixAddForm(
                 matrix: matrix,
                 matrixName: matrixName,
+                existingMatrixNames: widget.data.keys,
                 callback: (Matrix matrix, String name) {
-                  this.setState(() {
-                    if (name != matrixName) {
-                      print('Updated Matrix $matrixName to $name');
-                      this.widget.data.remove(matrixName);
-                    }
-                    this.widget.data[name] = matrix;
-                  });
+                  if(isNew)
+                    addMatrix(matrix, name);
+                  else
+                    editMatrix(matrixName, name, matrix, index, scaffoldContext);
                   if (scaffoldContext != null) {
                     Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
                       content: Text('Updated Matrix $name'),
@@ -49,7 +140,6 @@ class _DataPageState extends State<DataPage> {
                       // shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
                     ));
                   }
-                  print('Added to MatrixMap Matrix $name: ${this.widget.data[name].data}');
                 },
               ),
             ),
@@ -63,49 +153,20 @@ class _DataPageState extends State<DataPage> {
     return Scaffold(
       body: Builder(builder: (context) {
         BuildContext scaffoldContext = context;
-        if (widget.data.length == 0)
-          return Center(
-            child: Text('Add matrix by tapping [+] below'),
-          );
-        else
-          return ListView.builder(
-            itemCount: widget.data.length,
-            itemBuilder: (BuildContext context, i) {
-              String key = this.widget.data.keys.elementAt(i);
-              return Center(
-                child: Card(
-                  elevation: 3,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      ListTile(
-                        leading: Icon(Icons.add_box),
-                        title: Text(key),
-                        subtitle: Text(
-                            '${widget.data[key].row}x${widget.data[key].col}'),
-                        onTap: () {
-                          showDialog(
-                              context: context,
-                              builder: (BuildContext context) {
-                                String matrixLatexText = this
-                                  .widget
-                                  .data[key]
-                                  .getMathJexText(
-                                      parentheses: "square",
-                                      precision: widget.precision);
-                                return MatrixLatex(
-                                  label: "Matrix $key",
-                                  latexText: matrixLatexText
-                                );
-                              });
-                        },
-                        onLongPress: () {
-                          showLongPressDialog(context, key, scaffoldContext);
-                        },
-                      )
-                    ],
-                  ),
-                ),
+        // if (widget.data.length == 0)
+        //   return Center(
+        //     child: Text('Add matrix by tapping [+] below'),
+        //   );
+        // else
+          return AnimatedList(
+            key: _matrixListKey,
+            initialItemCount: widget.data.length,
+            itemBuilder: (BuildContext context, int index, Animation animation) {
+              String key = this.widget.data.keys.elementAt(index);
+              return SizeTransition(
+                axis: Axis.vertical,
+                sizeFactor: animation,
+                child: _buildItem(key, index, scaffoldContext)
               );
             },
           );
@@ -119,6 +180,7 @@ class _DataPageState extends State<DataPage> {
                 [0]
               ],
             ),
+            isNew: true
           );
         },
         elevation: 5,
@@ -128,7 +190,7 @@ class _DataPageState extends State<DataPage> {
     );
   }
 
-  void showLongPressDialog(BuildContext context, String key, BuildContext scaffoldContext) {
+  void showLongPressDialog(BuildContext context, String key, BuildContext scaffoldContext, int index) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -143,7 +205,9 @@ class _DataPageState extends State<DataPage> {
                     context: context,
                     matrix: this.widget.data[key],
                     matrixName: key,
-                    scaffoldContext: scaffoldContext
+                    scaffoldContext: scaffoldContext,
+                    isNew: false,
+                    index: index
                 );
               },
             ),
@@ -151,14 +215,14 @@ class _DataPageState extends State<DataPage> {
               child: Text('Duplicate'),
               onPressed: () {
                 Navigator.pop(context);
-                duplicateDialog(context, key, scaffoldContext, this.widget.data);
+                duplicateDialog(context, key, scaffoldContext, this.widget.data, index);
               },
             ),
             SimpleDialogOption(
               child: Text('Delete'),
               onPressed: () {
                 Navigator.pop(context);
-                confirmDeleteDialog(context, key, scaffoldContext);
+                confirmDeleteDialog(context, key, scaffoldContext, index);
               },
             )
           ],
@@ -167,25 +231,25 @@ class _DataPageState extends State<DataPage> {
     );
   }
 
-  void duplicateDialog(BuildContext context, String key, BuildContext scaffoldContext, Map<String, Matrix> data) {
+  void duplicateDialog(BuildContext context, String key, BuildContext scaffoldContext, Map<String, Matrix> data, int index) {
     String newMatrixName = key;
     while (data.containsKey(newMatrixName)) {
       newMatrixName = 'Copy_$newMatrixName';
     }
     this.setState(() {
-      data[newMatrixName] = Matrix.copyFrom(data[key]);
+      int newIndex = addMatrix(Matrix.copyFrom(data[key]), newMatrixName);
       Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
         content: Text('Duplicated Matrix $key to Matrix $newMatrixName'),
         duration: Duration(seconds: 2),
         action: SnackBarAction(
           label: 'Undo',
-          onPressed: () => this.setState(() => this.widget.data.remove(newMatrixName)),
+          onPressed: () => this.setState(() => deleteMatrix(newMatrixName, newIndex, scaffoldContext)),
         ),
       ));
     });
   }
 
-  void confirmDeleteDialog(BuildContext context, String key, BuildContext scaffoldContext) {
+  void confirmDeleteDialog(BuildContext context, String key, BuildContext scaffoldContext, int index) {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -196,14 +260,14 @@ class _DataPageState extends State<DataPage> {
                 child: Text('Yes'),
                 onPressed: () {
                   Matrix toDelete = this.widget.data[key];
-                  this.setState(() => this.widget.data.remove(key));
+                  deleteMatrix(key, index, scaffoldContext);
                   //  Display snackbar informing user, allowing user to undo
                   Scaffold.of(scaffoldContext).showSnackBar(SnackBar(
                     content: Text('Deleted Matrix $key'),
                     duration: Duration(seconds: 2),
                     action: SnackBarAction(
                       label: "Undo",
-                      onPressed: () => this.setState(() => this.widget.data[key] = toDelete),
+                      onPressed: () => this.setState(() => addMatrix(toDelete, key)),
                     ),
                     // backgroundColor: Colors.blue,
                     // shape: RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
