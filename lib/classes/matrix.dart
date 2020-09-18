@@ -149,7 +149,7 @@ class Matrix {
         for (int n = 0; n < this._col; n++) {
           out._data[i][n] = out._data[i][n] - (ratio * out._data[i - 1][n]);
         }
-        out._historyMessage.add('Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - ($ratio * R_{$i})\$\$');
+        out._historyMessage.add('Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - (${ratio.toStringAsPrecision(_historyPrecision)} * R_{$i})\$\$');
         out._historyState.add(Matrix.copyFrom(out));
         out._historyHighlight.add(Tuple2(i + 1, j + 1));
       }
@@ -168,7 +168,7 @@ class Matrix {
             //Fixes floating point problem. Ex : 0 * -0.333333 returns -0 instead of 0.
             if (this._data[i][n].abs() < _epsilon) this._data[i][n] = 0;
           }
-          this._historyMessage.add('Normalizing \\(Row_{${i+1}}\\).<br>Multiply row by \\($ratio\\) to make element at \$\$(Row_{${i+1}}, Col_{${j+1}})\$\$ into 1');
+          this._historyMessage.add('Normalizing \\(Row_{${i+1}}\\).<br>Multiply row by \\(${ratio.toStringAsPrecision(_historyPrecision)}\\) to make element at \$\$(Row_{${i+1}}, Col_{${j+1}})\$\$ into 1');
           this._historyState.add(Matrix.copyFrom(this));
           this._historyHighlight.add(Tuple2(i + 1, j + 1));
           break;
@@ -394,6 +394,7 @@ class Matrix {
   Matrix operator &(Matrix other) {
     assert(this._row == other._row, 'Row has to match');
     Matrix out = Matrix.copyFrom(this);
+    Matrix dummy = Matrix.copyFrom(out);
     int initColSize = out._col;
     out.zeroFillResize(row: out._row, col: out._col + other._col);
     for(int i = 0; i < out._row; i++) {
@@ -402,7 +403,7 @@ class Matrix {
       }
     }
     out.historyAdd(
-      message: 'Concatenate Matrix ${other.getMathJexText()} With our original Matrix ${out.getMathJexText()} To get',
+      message: 'Concatenate Matrix ${other.getMathJexText()} With our original Matrix ${dummy.getMathJexText()} To get',
       state: Matrix.copyFrom(out),
       highlights: Tuple2(null, null)
     );
