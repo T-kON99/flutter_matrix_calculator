@@ -186,6 +186,7 @@ class _OperationFormViewState extends State<OperationFormView> {
             children: <Widget>[
               Text('Matrix Name'),
               TextFormField(
+                maxLength: 10,
                 keyboardType: TextInputType.text,
                 validator: (String name) {
                   if (name.isEmpty) 
