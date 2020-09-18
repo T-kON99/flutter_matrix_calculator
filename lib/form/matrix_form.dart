@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:matrix_calculator/classes/matrix.dart';
 import 'package:numberpicker/numberpicker.dart';
+import 'package:charcode/charcode.dart';
 
 typedef void MatrixCallback(Matrix matrix, String name);
-
 class MatrixAddForm extends StatefulWidget {
   final Matrix matrix;
   final MatrixCallback callback;
   final String matrixName;
+  final Iterable<String> existingMatrixNames;
 
-  MatrixAddForm({Key key, this.matrix, this.callback, this.matrixName})
+  /// This widget will MODIFY the passed matrix.
+  MatrixAddForm({Key key, this.matrix, this.callback, this.matrixName, this.existingMatrixNames})
       : super(key: key);
   @override
   _MatrixAddFormState createState() => _MatrixAddFormState();
@@ -22,11 +24,43 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
   final matrixNameController = TextEditingController();
   int _minSize = 1;
   int _maxSize = 20;
+  Matrix out;
+  static const Map<int, String> SUBSCRIPT_CHARCODE = {
+    0: '₀',
+    1: '₁',
+    2: '₂',
+    3: '₃',
+    4: '₄',
+    5: '₅',
+    6: '₆',
+    7: '₇',
+    8: '₈',
+    9: '₉',
+  };
+
+  @override
+  void initState() {
+    super.initState();
+    this.out = Matrix.copyFrom(widget.matrix);
+  }
 
   @override
   void dispose() {
     matrixNameController.dispose();
     super.dispose();
+  }
+
+  String toSubscript(int number) {
+    String result = "";
+    if(number == 0)
+      return SUBSCRIPT_CHARCODE[number];
+    while(number > 0) {
+      int last = number % 10;
+      result += SUBSCRIPT_CHARCODE[last];
+      print(last);
+      number = number ~/ 10;
+    }
+    return String.fromCharCodes(result.codeUnits.reversed);
   }
 
   @override
@@ -63,7 +97,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                         if (_formKey.currentState.validate()) {
                           _formKey.currentState.save();
                           print('Saving Matrix ${matrixNameController.text}');
-                          this.widget.callback(this.widget.matrix, matrixNameController.text);
+                          this.widget.callback(out, matrixNameController.text);
                           Navigator.pop(context);
                         }
                       },
@@ -83,6 +117,9 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                 validator: (String name) {
                   if (name.isEmpty) {
                     return 'Please enter matrix name';
+                  }
+                  else if (widget.existingMatrixNames.contains(name)) {
+                    return 'Please enter a unique matrix name';
                   }
                   return null;
                 },
@@ -113,14 +150,14 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                                       ), // Not highlighted styles
                                     )),
                                 child: NumberPicker.integer(
-                                  initialValue: this.widget.matrix.row,
+                                  initialValue: out.row,
                                   minValue: _minSize,
                                   maxValue: _maxSize,
                                   itemExtent: 25,
                                   onChanged: (value) => this.setState(() {
-                                    this.widget.matrix.zeroFillResize(
+                                    out.zeroFillResize(
                                         row: value,
-                                        col: this.widget.matrix.col);
+                                        col: out.col);
                                   }),
                                 )),
                             Text('X'),
@@ -136,13 +173,13 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                                       ), // Not highlighted styles
                                     )),
                                 child: NumberPicker.integer(
-                                  initialValue: this.widget.matrix.col,
+                                  initialValue: out.col,
                                   minValue: _minSize,
                                   maxValue: _maxSize,
                                   itemExtent: 25,
                                   onChanged: (value) => this.setState(() {
-                                    this.widget.matrix.zeroFillResize(
-                                        row: this.widget.matrix.row,
+                                    out.zeroFillResize(
+                                        row: out.row,
                                         col: value);
                                   }),
                                 )),
@@ -167,7 +204,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
     return DataTable(
         columnSpacing: 10,
         columns: List.from(
-            List.generate(this.widget.matrix.col, (index) => index)
+            List.generate(out.col, (index) => index)
                 .map<DataColumn>((index) {
           return DataColumn(
               numeric: true,
@@ -178,10 +215,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                 textScaleFactor: 1.25,
               ));
         })),
-        rows: this
-            .widget
-            .matrix
-            .data
+        rows: out.data
             .asMap()
             .map((int rowIndex, List<double> row) {
               return MapEntry(
@@ -191,13 +225,17 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                     cells: row
                         .asMap()
                         .map((int colIndex, double value) {
-                          var _controller = TextEditingController(text: value.toString());
+                          var _controller = TextEditingController(text: value?.toString());
                           return MapEntry(
                               colIndex,
                               DataCell(
                                 TextFormField(
                                   controller: _controller,
                                   keyboardType: TextInputType.numberWithOptions(signed: true, decimal: true),
+                                  decoration: InputDecoration(
+                                    hintText: 'A${toSubscript(rowIndex + 1)},${toSubscript(colIndex + 1)}',
+                                    // hintText: 'Enter value',
+                                  ),
                                   // initialValue: value.toString(),
                                   validator: (value) {
                                     if (value.isEmpty) {
@@ -216,7 +254,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                                   onSaved: (value) {
                                     if (_formKey.currentState.validate()) {
                                       this.setState(() =>
-                                          this.widget.matrix.data[rowIndex]
+                                          out.data[rowIndex]
                                               [colIndex] = double.parse(value));
                                     }
                                   },
