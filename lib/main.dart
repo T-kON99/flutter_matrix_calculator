@@ -18,6 +18,7 @@ class _MainState extends State<Main> {
   Widget build(BuildContext context) {
     final pageController = PageController(initialPage: _curTabIndex);
     return MaterialApp(
+        title: 'Matrix Calculator',
         home: Scaffold(
       appBar: AppBar(
         title: Text('Matrix Calculator'),
