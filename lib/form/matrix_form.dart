@@ -118,7 +118,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                   if (name.isEmpty) {
                     return 'Please enter matrix name';
                   }
-                  else if (widget.existingMatrixNames.contains(name)) {
+                  else if (widget.existingMatrixNames.contains(name) && name != widget.matrixName) {
                     return 'Please enter a unique matrix name';
                   }
                   return null;
