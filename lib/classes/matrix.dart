@@ -179,14 +179,14 @@ class Matrix {
   }
 
   Matrix toRE() {
-    this._data = this.gaussElimination()._normalizeRE()._data;
+    this._data = this.gaussElimination()._data;
     return this;
   }
 
   //  TODO: ADD THE HISTORY STATE AND MESSAGE
   Matrix getRRE() {
     double ratio, temp;
-    Matrix out = Matrix.copyFrom(this).getRE();
+    Matrix out = Matrix.copyFrom(this).getRE()._normalizeRE();
     if (out._row > 1 || out._col > 1) {
       for (int i = out._row - 1; i >= 0; i--) {
         for (int k = 0; k < out._col; k++) {
@@ -216,7 +216,7 @@ class Matrix {
   /// Return a new matrix which is the RE (Row Echelon) form of given matrix.
   Matrix getRE() {
     var out = Matrix.copyFrom(this);
-    out = out.gaussElimination()._normalizeRE();
+    out = out.gaussElimination();
     return out;
   }
 
