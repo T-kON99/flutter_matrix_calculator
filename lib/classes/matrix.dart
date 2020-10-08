@@ -376,18 +376,23 @@ class Matrix {
 
   /// Matrix power of, follows the convention of inversing matrix with <Matrix>^(-1)
   Matrix operator ^(int power) {
-    assert(power >= -1,
-        'Invalid power, can only perform positive power multiplication');
+    assert(power >= -1 && this.isSquare(),
+        'Invalid power, can only perform positive power multiplication on square matrixes');
     //  Inverse Matrix
-    var out = Matrix.copyFrom(this);
+    Matrix out = Matrix.copyFrom(this);
+    Matrix result = Matrix.identity(size: this.size);
     if (power == -1) {
       return this.inv();
     } else {
-      for (int i = 0; i < power - 1; i++) {
-        out = out * this;
+      while (power > 0) {
+        if (power % 2 == 1) {
+          result *= out;
+        }
+        out *= out;
+        power ~/= 2;
       }
     }
-    return out;
+    return result;
   }
 
   /// Matrix concatenation. Row has to be equal.
