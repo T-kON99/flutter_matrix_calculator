@@ -52,14 +52,16 @@ class Matrix {
     this._size = this._row == this._col ? this._row : null;
   }
 
-  factory Matrix.copyFrom(Matrix other) {
+  factory Matrix.copyFrom(Matrix other, {bool copyHistory = true}) {
     var copy = Matrix.withSize(row: other._row, col: other._col);
     for(int i = 0; i < copy._row; i++)
       for(int j = 0; j < copy._col; j++)
         copy._data[i][j] = other._data[i][j];
-    copy._historyMessage = new List<String>.from(other._historyMessage);
-    copy._historyState = new List<Matrix>.from(other._historyState);
-    copy._historyHighlight = new List<Tuple2<int, int>>.from(other._historyHighlight);
+    if (copyHistory) {
+      copy._historyMessage = new List<String>.from(other._historyMessage);
+      copy._historyState = new List<Matrix>.from(other._historyState);
+      copy._historyHighlight = new List<Tuple2<int, int>>.from(other._historyHighlight);
+    }
     return copy;
   }
 
@@ -100,7 +102,7 @@ class Matrix {
     this._col = this._col - length;
     this.historyAdd(
       message: 'Shift matrix $length to the right $originalMatrix Deleting columns less than $length',
-      state: Matrix.copyFrom(this),
+      state: Matrix.copyFrom(this, copyHistory: false),
       highlights: Tuple2(null, null)
     );
     return this;
@@ -129,16 +131,20 @@ class Matrix {
           for (int n = 0; n < this._col; n++) {
             out._data[i - 1][n] = out._data[i - 1][n] + out._data[i][n];
           }
-          out._historyMessage.add('Element at \$\$(Row_{$i}, Col_{${j+1}}) = 0\$\$. Perform Elementary Row Operation \$\$Row_{$i} = Row_{$i} + Row_{${i+1}}\$\$');
-          out._historyState.add(Matrix.copyFrom(out));
-          out._historyHighlight.add(Tuple2(i, j + 1));
+          out.historyAdd(
+            message: 'Element at \$\$(Row_{$i}, Col_{${j+1}}) = 0\$\$. Perform Elementary Row Operation \$\$Row_{$i} = Row_{$i} + Row_{${i+1}}\$\$',
+            state: Matrix.copyFrom(out, copyHistory: false),
+            highlights: Tuple2(i, j + 1),
+          );
         }
 
         //  Step 2
         //  Get the ratio if applicable (non zero value, otherwise will result in dividing by 0)
-        out._historyMessage.add('Get Ratio of element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = \\frac{(Row_{${i+1}}, Col_{${j+1}})}{(Row_{${i}}, Col_{${j+1}})}\$\$');
-        out._historyState.add(Matrix.copyFrom(out));
-        out._historyHighlight.add(Tuple2(i + 1, j + 1));
+        out.historyAdd(
+          message: 'Get Ratio of element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = \\frac{(Row_{${i+1}}, Col_{${j+1}})}{(Row_{${i}}, Col_{${j+1}})}\$\$',
+          state: Matrix.copyFrom(out, copyHistory: false),
+          highlights: Tuple2(i + 1, j + 1),
+        );
         if (out._data[i - 1][j] != 0)
           ratio = out._data[i][j] / out._data[i - 1][j];
         else
@@ -149,9 +155,11 @@ class Matrix {
         for (int n = 0; n < this._col; n++) {
           out._data[i][n] = out._data[i][n] - (ratio * out._data[i - 1][n]);
         }
-        out._historyMessage.add('Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - (${ratio.toStringAsPrecision(_historyPrecision)} * R_{$i})\$\$');
-        out._historyState.add(Matrix.copyFrom(out));
-        out._historyHighlight.add(Tuple2(i + 1, j + 1));
+        out.historyAdd(
+          message: 'Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - (${ratio.toStringAsPrecision(_historyPrecision)} * R_{$i})\$\$',
+          state: Matrix.copyFrom(out, copyHistory: false),
+          highlights: Tuple2(i + 1, j + 1)
+        );
       }
     }
     return out;
@@ -168,9 +176,11 @@ class Matrix {
             //Fixes floating point problem. Ex : 0 * -0.333333 returns -0 instead of 0.
             if (this._data[i][n].abs() < _epsilon) this._data[i][n] = 0;
           }
-          this._historyMessage.add('Normalizing \\(Row_{${i+1}}\\).<br>Multiply row by \\(${ratio.toStringAsPrecision(_historyPrecision)}\\) to make element at \$\$(Row_{${i+1}}, Col_{${j+1}})\$\$ into 1');
-          this._historyState.add(Matrix.copyFrom(this));
-          this._historyHighlight.add(Tuple2(i + 1, j + 1));
+          this.historyAdd(
+            message: 'Normalizing \\(Row_{${i+1}}\\).<br>Multiply row by \\(${ratio.toStringAsPrecision(_historyPrecision)}\\) to make element at \$\$(Row_{${i+1}}, Col_{${j+1}})\$\$ into 1',
+            state: Matrix.copyFrom(this, copyHistory: false),
+            highlights: Tuple2(i + 1, j + 1),
+          );
           break;
         }
       }
@@ -202,9 +212,11 @@ class Matrix {
                 out._data[rowThis][n] = out._data[rowThis][n] - temp;
               }
             }
-            out._historyMessage.add('Perform Gaussian Elimination on the pivots which is on \$\$(Row_{${i+1}}, Col_{${k+1}})\$\$');
-            out._historyState.add(Matrix.copyFrom(out));
-            out._historyHighlight.add(Tuple2(i + 1, k + 1));
+            out.historyAdd(
+              message: 'Perform Gaussian Elimination on the pivots which is on \$\$(Row_{${i+1}}, Col_{${k+1}})\$\$',
+              state: Matrix.copyFrom(out, copyHistory: false),
+              highlights: Tuple2(i + 1, k + 1),
+            );
             break;
           }
         }
@@ -244,18 +256,28 @@ class Matrix {
             }
           }
         }
-        this._historyMessage.add('Get cofactor matrix by excluding \\(Row_{${rowIndex+1}}\\) and \\(Col_{${colIndex+1}}\\)');
-        this._historyState.add(Matrix.copyFrom(output));
-        this._historyHighlight.add(Tuple2(null, null));
+        this.historyAdd(
+          message: 'Get cofactor matrix by excluding \\(Row_{${rowIndex+1}}\\) and \\(Col_{${colIndex+1}}\\)',
+          state: Matrix.copyFrom(output, copyHistory: false),
+          highlights: Tuple2(null, null),
+        );
+
         this._data[rowIndex][colIndex] = output.det();
-        this._historyMessage.add('Element \\((Row_{${rowIndex+1}}, Col_{${colIndex+1}})\\) has the value of the determinant of cofactor.');
-        this._historyState.add(Matrix.copyFrom(this));
-        this._historyHighlight.add(Tuple2(rowIndex + 1, colIndex + 1));
+
+        this.historyAdd(
+          message: 'Element \\((Row_{${rowIndex+1}}, Col_{${colIndex+1}})\\) has the value of the determinant of cofactor.',
+          state: Matrix.copyFrom(this, copyHistory: false),
+          highlights: Tuple2(rowIndex + 1, colIndex + 1),
+        );
+
         if ((rowIndex + colIndex) % 2 == 1)
           this._data[rowIndex][colIndex] = this._data[rowIndex][colIndex] * -1;
-        this._historyMessage.add('Multiply by -1 when Index of \$\$Row_{${rowIndex+1}} + Col_{${colIndex+1}} = ${rowIndex+1} + ${colIndex+1}\$\$ is not divisible by 2');
-        this._historyState.add(Matrix.copyFrom(this));
-        this._historyHighlight.add(Tuple2(rowIndex + 1, colIndex + 1));
+        
+        this.historyAdd(
+          message: 'Multiply by -1 when Index of \$\$Row_{${rowIndex+1}} + Col_{${colIndex+1}} = ${rowIndex+1} + ${colIndex+1}\$\$ is not divisible by 2',
+          state: Matrix.copyFrom(this, copyHistory: false),
+          highlights: Tuple2(rowIndex + 1, colIndex + 1),
+        );
       }
     }
     return this;
@@ -293,10 +315,13 @@ class Matrix {
       for (int j = 0; j < _col; j++) {
         assert(this._data[i][j] != null && other._data[i][j] != null,
             'Invalid null type in addition');
+
+        result.historyAdd(
+          message: 'Add element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} + ${other._data[i][j]} = ${result._data[i][j]}\$\$',
+          state: Matrix.copyFrom(result, copyHistory: false),
+          highlights: Tuple2(i + 1, j + 1),
+        );
         result._data[i][j] = this._data[i][j] + other._data[i][j];
-        result._historyMessage.add('Add element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} + ${other._data[i][j]} = ${result._data[i][j]}\$\$');
-        result._historyState.add(Matrix.copyFrom(result));
-        result._historyHighlight.add(Tuple2(i + 1, j + 1));
       }
     }
     return result;
@@ -310,9 +335,11 @@ class Matrix {
       for (int i = 0; i < _row; i++) {
         for (int j = 0; j < _col; j++) {
           result._data[i][j] = other * _data[i][j];
-          result._historyMessage.add('Multiply \\($other\\) with element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = $other * ${_data[i][j]} = ${result._data[i][j]}\$\$');
-          result._historyState.add(Matrix.copyFrom(result));
-          result._historyHighlight.add(Tuple2(i + 1, j + 1));
+          result.historyAdd(
+            message: 'Multiply \\($other\\) with element at \$\$(Row_{${i+1}}, Col_{${j+1}}) = $other * ${_data[i][j]} = ${result._data[i][j]}\$\$',
+            state: Matrix.copyFrom(result, copyHistory: false),
+            highlights: Tuple2(i + 1, j + 1),
+          );
         }
       }
     }
@@ -327,9 +354,11 @@ class Matrix {
           for (int k = 0; k < this._col; k++) {
             result._data[i][j] += this._data[i][k] * other._data[k][j];
           }
-          result._historyMessage.add('Perform a dot product on First Matrix\'s \\(Row_{${i+1}}\\) and Second Matrix\'s \\(Col_{${j+1}}\\). <br>Result will be element at \\((Row_{${i+1}}, Col_{${j+1}})\\)');
-          result._historyState.add(Matrix.copyFrom(result));
-          result._historyHighlight.add(Tuple2(i + 1, j + 1));
+          result.historyAdd(
+            message: 'Perform a dot product on First Matrix\'s \\(Row_{${i+1}}\\) and Second Matrix\'s \\(Col_{${j+1}}\\). <br>Result will be element at \\((Row_{${i+1}}, Col_{${j+1}})\\)',
+            state: Matrix.copyFrom(result, copyHistory: false),
+            highlights: Tuple2(i + 1, j + 1),
+          );
         }
       }
     }
@@ -351,9 +380,11 @@ class Matrix {
         assert(this._data[i][j] != null && other._data[i][j] != null,
             'Invalid null type in addition');
         result._data[i][j] = this._data[i][j] - other._data[i][j];
-        result._historyMessage.add('Subtract element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} - ${other._data[i][j]} = ${result._data[i][j]}\$\$');
-        result._historyState.add(Matrix.copyFrom(result));
-        result._historyHighlight.add(Tuple2(i + 1, j + 1));
+        result.historyAdd(
+          message: 'Subtract element at position \$\$(Row_{${i+1}}, Col_{${j+1}}) = ${this._data[i][j]} - ${other._data[i][j]} = ${result._data[i][j]}\$\$',
+          state: Matrix.copyFrom(result, copyHistory: false),
+          highlights: Tuple2(i + 1, j + 1),
+        );
       }
     }
     return result;
@@ -368,9 +399,11 @@ class Matrix {
         this._data[j][i] = original._data[i][j];
       }
     }
-    this._historyMessage.add('Transpose Matrix');
-    this._historyState.add(Matrix.copyFrom(this));
-    this._historyHighlight.add(Tuple2(null, null));
+    this.historyAdd(
+      message: 'Transpose Matrix',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null),
+    );
     return this;
   }
 
@@ -409,7 +442,7 @@ class Matrix {
     }
     out.historyAdd(
       message: 'Concatenate Matrix ${other.getMathJexText()} With our original Matrix ${dummy.getMathJexText()} To get',
-      state: Matrix.copyFrom(out),
+      state: Matrix.copyFrom(out, copyHistory: false),
       highlights: Tuple2(null, null)
     );
     return out;
