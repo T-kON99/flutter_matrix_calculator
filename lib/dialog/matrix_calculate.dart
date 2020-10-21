@@ -163,6 +163,9 @@ class _CalculateFormViewState extends State<CalculateFormView> {
       Operation.INV: () => widget.data[givenMatrix].isSquare() && widget.data[givenMatrix].det() != 0,
       Operation.RE: () => true,
       Operation.RRE: () => true,
+      Operation.COFACTOR: () => widget.data[givenMatrix].isSquare(),
+      Operation.ADJOINT: () => widget.data[givenMatrix].isSquare(),
+      Operation.TRANSPOSE: () => true,
     };
     final bool validity = handler[operation]();
     print('Checking validity of matrix operation: $givenMatrix $operation $otherMatrix -> $validity');

@@ -29,6 +29,9 @@ class _OperationFormViewState extends State<OperationFormView> {
     Operation.INV: (Matrix m1, Matrix m2, double s) => m1.inv(),
     Operation.RE: (Matrix m1, Matrix m2, double s) => m1.getRE(),
     Operation.RRE: (Matrix m1, Matrix m2, double s) => m1.getRRE(),
+    Operation.COFACTOR: (Matrix m1, Matrix m2, double s) => m1.getCofactor(),
+    Operation.ADJOINT: (Matrix m1, Matrix m2, double s) => m1.getAdjoint(),
+    Operation.TRANSPOSE: (Matrix m1, Matrix m2, double s) => m1.getTranspose()
   };
 
   @override
@@ -148,7 +151,7 @@ class _OperationFormViewState extends State<OperationFormView> {
           );
         return MatrixLatex(
           label: label, 
-          latexText: result.getHistoryText() + output,
+          latexText: result.getHistoryText(stepsOnly: true) + output,
           actions: <Widget>[
             FlatButton(
               child: Text('Save'),

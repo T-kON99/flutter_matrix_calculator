@@ -12,7 +12,10 @@ enum Operation {
   DET,
   INV,
   RE,
-  RRE
+  RRE,
+  COFACTOR,
+  ADJOINT,
+  TRANSPOSE,
 }
 
 extension OperationsExt on Operation {
@@ -26,6 +29,9 @@ extension OperationsExt on Operation {
     Operation.INV: "inv",
     Operation.RE: "RE",
     Operation.RRE: "RRE",
+    Operation.COFACTOR: "cofac",
+    Operation.ADJOINT: "adj",
+    Operation.TRANSPOSE: "trans"
   };
 
   static const operationFullName = {
@@ -38,6 +44,9 @@ extension OperationsExt on Operation {
     Operation.INV: "Inverse",
     Operation.RE: "Row Echelon Form",
     Operation.RRE: "Reduced Row Echelon Form",
+    Operation.COFACTOR: "Cofactor",
+    Operation.ADJOINT: "Adjoint",
+    Operation.TRANSPOSE: "Transpose"
   };
   
   String get shortName => operationShortName[this];
@@ -137,5 +146,32 @@ final List<MatrixOperation> MatrixOperations = <MatrixOperation>[
       true,
       false,
       'Calculate the Reduced Row Echelon Form (RRE) of the given Matrix',
-  )
+  ),
+  MatrixOperation(
+    Operation.COFACTOR,
+    CustomIcon.calculator,
+    Colors.red[300],
+    Colors.teal[300],
+    true,
+    false,
+    'Calculate the Cofactor of the given Matrix. Given Matrix must be a square Matrix',
+  ),
+  MatrixOperation(
+    Operation.ADJOINT,
+    CustomIcon.sync_icon,
+    Colors.red[300],
+    Colors.lime[500],
+    true,
+    false,
+    'Calculate the adjoint form of the given Matrix. Given Matrix must be a square Matrix',
+  ),
+  MatrixOperation(
+    Operation.TRANSPOSE,
+    CustomIcon.ok_circle,
+    Colors.purple[300],
+    Colors.pink[200],
+    true,
+    false,
+    'Calculate the transpose of the given Matrix. Matrix can be of any size.',
+  ),
 ];
