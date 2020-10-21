@@ -92,7 +92,13 @@ class _DataPageState extends State<DataPage> {
                         );
                       return MatrixLatex(
                         label: "Matrix $key",
-                        latexText: matrixLatexText
+                        latexText: matrixLatexText,
+                        actions: <Widget>[
+                          FlatButton(
+                            child: Text('Close'),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
                       );
                     });
               },
@@ -212,6 +218,13 @@ class _DataPageState extends State<DataPage> {
               },
             ),
             SimpleDialogOption(
+              child: Text('Show History'),
+              onPressed: () {
+                Navigator.pop(context);
+                showHistoryDialog(context, key, scaffoldContext, this.widget.data, index);
+              }
+            ),
+            SimpleDialogOption(
               child: Text('Duplicate'),
               onPressed: () {
                 Navigator.pop(context);
@@ -278,6 +291,26 @@ class _DataPageState extends State<DataPage> {
             ],
           );
         }
+    );
+  }
+
+  void showHistoryDialog(BuildContext context, String key, BuildContext scaffoldContext, Map<String, Matrix> data, int index) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return MatrixLatex(
+          label: 'History of Matrix $key', 
+          latexText: data[key].getHistoryText(),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Close'),
+              onPressed: () {
+                Navigator.pop(context);
+              }
+            )
+          ]
+        );
+      }
     );
   }
 }

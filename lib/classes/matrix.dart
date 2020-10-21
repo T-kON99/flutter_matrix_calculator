@@ -7,8 +7,10 @@ class Matrix {
   List<Matrix> _historyState;
   List<Tuple2<int, int>> _historyHighlight;
   Tuple2<String, String> _historyMessageSymbol = Tuple2(r'$i', r'$j');
+  int _stepStart;
+  int _stepEnd;
   static const int _historyPrecision = 3;
-  static const _epsilon = 0.0000000001;
+  static const _epsilon = 0.000000001;
 
   int get row => this._row;
   int get col => this._col;
@@ -29,6 +31,8 @@ class Matrix {
     this._historyHighlight = [];
     this._data = new List.generate(_row, (_) => List<double>.generate(_col, (_) => null));
     this._size = this._row == this._col ? this._row : null;
+    this._stepStart = 0;
+    this._stepEnd = 0;
   }
 
   Matrix.identity({int size}) {
@@ -40,6 +44,8 @@ class Matrix {
     this._historyState = [];
     this._historyHighlight = [];
     this._data = new List.generate(_row, (rowIndex) => List<double>.generate(_col, (colIndex) => rowIndex == colIndex ? 1 : 0));
+    this._stepStart = 0;
+    this._stepEnd = 0;
   }
 
   Matrix({List<List<double>> data}) {
@@ -50,6 +56,8 @@ class Matrix {
     this._historyState = [];
     this._historyHighlight = [];
     this._size = this._row == this._col ? this._row : null;
+    this._stepStart = 0;
+    this._stepEnd = 0;
   }
 
   factory Matrix.copyFrom(Matrix other, {bool copyHistory = true}) {
@@ -62,6 +70,8 @@ class Matrix {
       copy._historyState = new List<Matrix>.from(other._historyState);
       copy._historyHighlight = new List<Tuple2<int, int>>.from(other._historyHighlight);
     }
+    copy._stepStart = copy._historyMessage.length;
+    copy._stepEnd = copy._historyMessage.length;
     return copy;
   }
 
@@ -76,6 +86,7 @@ class Matrix {
     }));
     this._row = row;
     this._col = col;
+    this._size = this._row == this._col ? this._row : null;
     this._data = newData;
   }
 
@@ -83,6 +94,7 @@ class Matrix {
     this._historyMessage = new List<String>.from(other._historyMessage);
     this._historyState = new List<Matrix>.from(other._historyState);
     this._historyHighlight = new List<Tuple2<int, int>>.from(other._historyHighlight);
+    this._stepStart = this._historyMessage.length;
   }
 
   //  This method will replace message $i with row from highlights value.
@@ -90,6 +102,16 @@ class Matrix {
     this._historyMessage.add(message);
     this._historyState.add(state);
     this._historyHighlight.add(highlights);
+    this._stepEnd = this._historyMessage.length;
+  }
+
+  //  This method is used to tell to add state update to the matrix if it's edited. This allows for clearer history message.
+  void updateState() {
+    this.historyAdd(
+      message: 'Matrix edited and updated to size \\(${this._row}\\) \\(\\times\\) \\(${this._col}\\)',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
   }
 
   /// This mutates current object
@@ -103,7 +125,7 @@ class Matrix {
     this.historyAdd(
       message: 'Shift matrix $length to the right $originalMatrix Deleting columns less than $length',
       state: Matrix.copyFrom(this, copyHistory: false),
-      highlights: Tuple2(null, null)
+      highlights: Tuple2(null, null),
     );
     return this;
   }
@@ -121,6 +143,11 @@ class Matrix {
 
   Matrix gaussElimination() {
     var out = Matrix.copyFrom(this);
+    out.historyAdd(
+      message: 'Performing Gaussian Elimination on the matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     double ratio;
     for (int j = 0; j < this._col; j++) {
       for (int i = this._row - 1; i > j; i--) {
@@ -158,7 +185,7 @@ class Matrix {
         out.historyAdd(
           message: 'Perform Elementary Row Operation \$\$R_{${i + 1}} = R_{${i + 1}} - (${ratio.toStringAsPrecision(_historyPrecision)} * R_{$i})\$\$',
           state: Matrix.copyFrom(out, copyHistory: false),
-          highlights: Tuple2(i + 1, j + 1)
+          highlights: Tuple2(i + 1, j + 1),
         );
       }
     }
@@ -167,6 +194,13 @@ class Matrix {
 
   Matrix _normalizeRE() {
     double ratio;
+    // Set starting step
+    this._stepStart = this._historyMessage.length;
+    this.historyAdd(
+      message: 'Normalizing leftmost non-zero value of the matrix to make it equal to 1',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     for (int i = 0; i < this._row; i++) {
       for (int j = 0; j < this._col; j++) {
         if (this._data[i][j].abs() > _epsilon) {
@@ -189,14 +223,27 @@ class Matrix {
   }
 
   Matrix toRE() {
+    int stepStart = this._historyMessage.length;
+    this.historyAdd(
+      message: 'Converting to Row Echelon Form of the matrix',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     this._data = this.gaussElimination()._data;
+    this._stepStart = stepStart;
     return this;
   }
 
-  //  TODO: ADD THE HISTORY STATE AND MESSAGE
   Matrix getRRE() {
     double ratio, temp;
-    Matrix out = Matrix.copyFrom(this).getRE()._normalizeRE();
+    Matrix out = Matrix.copyFrom(this);
+    int stepStart = out._historyMessage.length;
+    out.historyAdd(
+      message: 'Getting Reduced Row Echelon Form of the matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    out = out.getRE()._normalizeRE();
     if (out._row > 1 || out._col > 1) {
       for (int i = out._row - 1; i >= 0; i--) {
         for (int k = 0; k < out._col; k++) {
@@ -222,12 +269,18 @@ class Matrix {
         }
       }
     }
+    out._stepStart = stepStart;
     return out;
   }
 
   /// Return a new matrix which is the RE (Row Echelon) form of given matrix.
   Matrix getRE() {
     var out = Matrix.copyFrom(this);
+    out.historyAdd(
+      message: 'Getting Row Echelon Form of the matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     out = out.gaussElimination();
     return out;
   }
@@ -237,9 +290,15 @@ class Matrix {
     int size, rowOutput, colOutput;
     var output = Matrix.withSize(row: this._row - 1, col: this._col - 1);
     var copy = Matrix.copyFrom(this);
+    this._stepStart = this._historyMessage.length;
     size = this._size;
     rowOutput = 0;
     colOutput = 0;
+    this.historyAdd(
+      message: 'Converting to cofactor of the matrix',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     for (int rowIndex = 0; rowIndex < size; rowIndex++) {
       for (int colIndex = 0; colIndex < size; colIndex++) {
         for (int rowPos = 0; rowPos < size; rowPos++) {
@@ -270,30 +329,81 @@ class Matrix {
           highlights: Tuple2(rowIndex + 1, colIndex + 1),
         );
 
-        if ((rowIndex + colIndex) % 2 == 1)
+        if ((rowIndex + colIndex) % 2 == 1) {
           this._data[rowIndex][colIndex] = this._data[rowIndex][colIndex] * -1;
         
-        this.historyAdd(
-          message: 'Multiply by -1 when Index of \$\$Row_{${rowIndex+1}} + Col_{${colIndex+1}} = ${rowIndex+1} + ${colIndex+1}\$\$ is not divisible by 2',
-          state: Matrix.copyFrom(this, copyHistory: false),
-          highlights: Tuple2(rowIndex + 1, colIndex + 1),
-        );
+          this.historyAdd(
+            message: 'Multiply by -1 when Index of \$\$Row_{${rowIndex+1}} + Col_{${colIndex+1}} = ${rowIndex+1} + ${colIndex+1}\$\$ is not divisible by 2',
+            state: Matrix.copyFrom(this, copyHistory: false),
+            highlights: Tuple2(rowIndex + 1, colIndex + 1),
+          );
+        }
       }
     }
     return this;
   }
 
-  Matrix toAdjoint() {
-    assert(this.isSquare(), "Not a square matrix, error");
-    this.toCofactor();
-    return ~this;
+  Matrix getCofactor() {
+    Matrix out = Matrix.copyFrom(this);
+    int stepStart = out._historyMessage.length;
+    out.historyAdd(
+      message: 'Getting cofactor of the matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    double det = out.det();
+    if (det != 0) {
+      out = Matrix.copyFrom(out.inv());
+      out *= det;
+      out = ~out;
+      out._stepStart = stepStart;
+    }
+    else out.toCofactor();
+    return out;
   }
 
-  //  TODO: Implement Faster inv with just concatenating n x n matrix with n x n Identity matrix and then taking RRE.
+  Matrix toAdjoint() {
+    assert(this.isSquare(), "Not a square matrix, error");
+    int stepStart = this._historyMessage.length;
+    this.historyAdd(
+      message: 'Converting to adjoint of the matrix',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    this.toCofactor();
+    Matrix _ = ~this;
+    this._stepStart = stepStart;
+    return this;
+  }
+
+  Matrix getAdjoint() {
+    Matrix out = Matrix.copyFrom(this);
+    int stepStart = out._historyMessage.length;
+    double det = out.det();
+    out.historyAdd(
+      message: 'Getting adjoint of the matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    if(det != 0) {
+      out = Matrix.copyFrom(out.inv());
+      out *= det;
+      out._stepStart = stepStart;
+    }
+    else out.toAdjoint();
+    return out;
+  }
+
   //  Inverse will be the right side of the matrix (Was identity)
   Matrix inv() {
     assert(this.isSquare(), 'Can not perform inverse on a non-square matrix');
     var out = Matrix.copyFrom(this);
+    int stepStart = out._historyMessage.length;
+    out.historyAdd(
+      message: 'Getting inverse of the matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     double det;
     det = out.det();
     assert(det.abs() > _epsilon,
@@ -301,7 +411,13 @@ class Matrix {
     Matrix expanded = out & Matrix.identity(size: out.size);
     Matrix result = expanded.getRRE();
     result.shift(length: out._size);
+    result._stepStart = stepStart;
     return result;
+  }
+
+  Matrix getTranspose() {
+    Matrix out = Matrix.copyFrom(this);
+    return ~out;
   }
 
   ///  Matrix Addition
@@ -311,6 +427,16 @@ class Matrix {
     var result = Matrix.copyFrom(this);
     result._row = other._row;
     result._col = other._col;
+    result.historyAdd(
+      message: 'Performing addition of Matrix',
+      state: Matrix.copyFrom(result, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    result.historyAdd(
+      message: 'With Matrix',
+      state: Matrix.copyFrom(other, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     for (int i = 0; i < _row; i++) {
       for (int j = 0; j < _col; j++) {
         assert(this._data[i][j] != null && other._data[i][j] != null,
@@ -332,6 +458,11 @@ class Matrix {
     var result = Matrix.copyFrom(this);
     //  A scaling operation of Matrix with const scale
     if (other is num) {
+      result.historyAdd(
+        message: 'Performing scalar multiplication $other with matrix',
+        state: Matrix.copyFrom(result, copyHistory: false),
+        highlights: Tuple2(null, null)
+      );
       for (int i = 0; i < _row; i++) {
         for (int j = 0; j < _col; j++) {
           result._data[i][j] = other * _data[i][j];
@@ -348,6 +479,16 @@ class Matrix {
       assert(this._col == other._row, 'Dimension of the matrixes must obey matrix multiplication law which is m x n * n x k');
       result = Matrix.withSize(row: this._row, col: other._col);
       result._copyHistory(this);
+      result.historyAdd(
+        message: 'Performing matrix multiplication of matrix',
+        state: Matrix.copyFrom(this, copyHistory: false),
+        highlights: Tuple2(null, null)
+      );
+      result.historyAdd(
+        message: 'With Matrix',
+        state: Matrix.copyFrom(other, copyHistory: false),
+        highlights: Tuple2(null, null)
+      );
       for (int i = 0; i < result._row; i++) {
         for (int j = 0; j < result._col; j++) {
           result._data[i][j] = 0;
@@ -375,6 +516,16 @@ class Matrix {
     var result = Matrix.copyFrom(this);
     result._row = other._row;
     result._col = other._col;
+    result.historyAdd(
+      message: 'Performing matrix subtraction of matrix',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    result.historyAdd(
+      message: 'With Matrix',
+      state: Matrix.copyFrom(other, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
     for (int i = 0; i < _row; i++) {
       for (int j = 0; j < _col; j++) {
         assert(this._data[i][j] != null && other._data[i][j] != null,
@@ -393,17 +544,19 @@ class Matrix {
   /// Matrix transpose
   Matrix operator ~() {
     Matrix original = Matrix.copyFrom(this);
+    int stepStart = original._stepStart;
+    this.historyAdd(
+      message: 'Transpose Matrix',
+      state: Matrix.copyFrom(this, copyHistory: false),
+      highlights: Tuple2(null, null),
+    );
     this.zeroFillResize(col: original._row, row: original._col);
     for (int i = 0; i < original._row; i++) {
       for (int j = 0; j < original._col; j++) {
         this._data[j][i] = original._data[i][j];
       }
     }
-    this.historyAdd(
-      message: 'Transpose Matrix',
-      state: Matrix.copyFrom(this, copyHistory: false),
-      highlights: Tuple2(null, null),
-    );
+    this._stepStart = stepStart;
     return this;
   }
 
@@ -411,20 +564,37 @@ class Matrix {
   Matrix operator ^(int power) {
     assert(power >= -1 && this.isSquare(),
         'Invalid power, can only perform positive power multiplication on square matrixes');
-    //  Inverse Matrix
     Matrix out = Matrix.copyFrom(this);
-    Matrix result = Matrix.identity(size: this.size);
+    Matrix result = Matrix.identity(size: out.size);
+    result._copyHistory(out);
+    int stepStart = result._historyMessage.length;
+    int powerTemp = 1;
+    result.historyAdd(
+      message: 'Performing matrix power $power of matrix',
+      state: Matrix.copyFrom(out, copyHistory: false),
+      highlights: Tuple2(null, null)
+    );
+    //  Inverse Matrix
     if (power == -1) {
       return this.inv();
     } else {
+      // Binary Exponentiation
       while (power > 0) {
         if (power % 2 == 1) {
           result *= out;
         }
         out *= out;
         power ~/= 2;
+        powerTemp *= 2;
+        if (power > 0)
+          result.historyAdd(
+            message: 'Update second Matrix to multiply with itself, and become raised to power $powerTemp',
+            state: Matrix.copyFrom(out, copyHistory: false),
+            highlights: Tuple2(null, null)
+          );
       }
     }
+    result._stepStart = stepStart;
     return result;
   }
 
@@ -470,13 +640,14 @@ class Matrix {
     return latexText;
   }
 
-  String getHistoryText({int precision = Matrix._historyPrecision}) {
+  String getHistoryText({int precision = Matrix._historyPrecision, bool stepsOnly = false}) {
     assert(this._historyHighlight.length == this._historyMessage.length && this._historyMessage.length == this._historyState.length, "Size of history must match");
     String result = "";
-    for(int i = 0; i < this._historyMessage.length; i++) {
+    for(int i = stepsOnly ? this._stepStart : 0; i < this._historyMessage.length; i++) {
       int rowHighlight = this._historyHighlight[i].item1 == null ? null : this._historyHighlight[i].item1 - 1;
       int colHighlight = this._historyHighlight[i].item2 == null ? null : this._historyHighlight[i].item2 - 1;
-      result += "\\(${i+1}. \\)" + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText(highlightRow: rowHighlight, highlightCol: colHighlight, precision: precision) + '\n';
+      int stepNo = stepsOnly ? i - this._stepStart + 1 : i + 1;
+      result += "\\($stepNo. \\)" + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText(highlightRow: rowHighlight, highlightCol: colHighlight, precision: precision) + '\n';
     }
     result += "Operation Result""\n" + this.getMathJexText(precision: precision) + '\n';
     return result;
