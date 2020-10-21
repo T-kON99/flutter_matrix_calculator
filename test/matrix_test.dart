@@ -223,9 +223,9 @@ void main() {
     ]);
   });
 
-    test('1000 Reduced Row Echelon Form iterations of random 3x6 Matrix extreme floating points', () {
+    test('100000 Reduced Row Echelon Form iterations of random 3x6 Matrix extreme floating points', () {
     Random _random = new Random();
-    for(int i = 0; i < 1000; i++) {
+    for(int i = 0; i < 100000; i++) {
       final mat = Matrix(data: [
         [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
         [_random.nextDouble() * 100, _random.nextDouble() * 100, _random.nextDouble() * 100],
@@ -244,6 +244,31 @@ void main() {
     }
   });
 
+  test('Cofactor of a 3x3 Matrix', () {
+    final mat = Matrix(data: [
+      [1, 2, 3],
+      [0, 4, 5],
+      [1, 0, 6]
+    ]);
+    expect(mat.getCofactor().data, [
+      [moreOrLessEquals(24), moreOrLessEquals(5), moreOrLessEquals(-4)],
+      [moreOrLessEquals(-12), moreOrLessEquals(3), moreOrLessEquals(2)],
+      [moreOrLessEquals(-2), moreOrLessEquals(-5), moreOrLessEquals(4)]
+    ]);
+  });
+
+  test('Adjoint of a 3x3 Matrix', () {
+    final mat = Matrix(data: [
+      [1, 2, 3],
+      [0, 4, 5],
+      [1, 0, 6]
+    ]);
+    expect(mat.getAdjoint().getTranspose().data, [
+      [moreOrLessEquals(24), moreOrLessEquals(5), moreOrLessEquals(-4)],
+      [moreOrLessEquals(-12), moreOrLessEquals(3), moreOrLessEquals(2)],
+      [moreOrLessEquals(-2), moreOrLessEquals(-5), moreOrLessEquals(4)]
+    ]);
+  });
 
   test('Inverse of a 2x2 Matrix', () {
     final mat = Matrix(data: [
@@ -321,10 +346,10 @@ void main() {
     expect(matA.historyState.length, 0);
     expect(matB.historyMessage.length, 0);
     expect(matB.historyState.length, 0);
-    expect(matC.historyMessage.length, 9);
-    expect(matC.historyState.length, 9);
-    expect(matD.historyMessage.length, 9);
-    expect(matD.historyState.length, 9);
+    expect(matC.historyMessage.length, 11);
+    expect(matC.historyState.length, 11);
+    expect(matD.historyMessage.length, 11);
+    expect(matD.historyState.length, 11);
   });
 
   test('History of complex Matrix arithmetic', () {
@@ -342,8 +367,8 @@ void main() {
     Matrix matC = (matA * matB + matA) - matB;
     // print(matC.historyMessage);
     // for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
-    expect(matC.historyMessage.length, 27);
-    expect(matC.historyState.length, 27);
+    expect(matC.historyMessage.length, 33);
+    expect(matC.historyState.length, 33);
   });
 
   test('History of RRE', () {
@@ -355,7 +380,7 @@ void main() {
     Matrix matC = matA.getRRE();
     // print(matC.historyMessage);
     // for(int i = 0; i < matC.historyState.length; i++) print(matC.historyState[i].data);
-    expect(matC.historyMessage.length, 12);
+    expect(matC.historyMessage.length, 16);
   });
 
   test('Concatenate 2 matrixes', () {
@@ -388,11 +413,11 @@ void main() {
       [1, 1],
       [9, 9]
     ]);
-    expect((matA & matB).getHistoryText(),'\\(1. \\)Concatenate Matrix \$\$\\begin{bmatrix}2.00&1.00\\\\1.00&1.00\\\\9.00&9.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$ To get\n'
+    expect((matA & matB).getHistoryText(),'\\(1. \\)Concatenate Matrix \$\$\\begin{bmatrix}2.00&1.00\\\\1.00&1.00\\\\9.00&9.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}1.00&2.00&3.00\\\\2.00&4.00&1.00\\\\0.00&1.00&2.00\\end{bmatrix}\$\$ To get\n'
       '\$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$\n'
       'Operation Result\n'
       '\$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$\n'
-      '');
+    '');
   });
 
   test('Initiate Identity 2x2 Matrix', () {
@@ -437,6 +462,46 @@ void main() {
       '\$\$\\begin{bmatrix}2.00\\\\1.00\\end{bmatrix}\$\$\n'
       'Operation Result\n'
       '\$\$\\begin{bmatrix}2.00\\\\1.00\\end{bmatrix}\$\$\n'
+    '');
+  });
+
+  test('Complex Chained Matrix Steps', () {
+    final mat = Matrix(data: [
+      [1, 3],
+      [5, 2]
+    ]);
+    Matrix a = mat * mat;
+    Matrix b = a * a;
+    Matrix c = b.getRRE();
+    Matrix d = c + b^4;
+    expect((d.inv()).getHistoryText(stepsOnly: true), '\\(1. \\)Getting inverse of the matrix\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11\\\\3.41e+11&3.01e+11\\end{bmatrix}\$\$\n'
+      '\\(2. \\)Concatenate Matrix \$\$\\begin{bmatrix}1.00&0.00\\\\0.00&1.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}2.32e+11&2.05e+11\\\\3.41e+11&3.01e+11\\end{bmatrix}\$\$ To get\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
+      '\\(3. \\)Getting Reduced Row Echelon Form of the matrix\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
+      '\\(4. \\)Getting Row Echelon Form of the matrix\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
+      '\\(5. \\)Performing Gaussian Elimination on the matrix\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
+      '\\(6. \\)Get Ratio of element at \$\$(Row_{2}, Col_{1}) = \\frac{(Row_{2}, Col_{1})}{(Row_{1}, Col_{1})}\$\$\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\\\colorbox{yellow}{3.41e+11}&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
+      '\\(7. \\)Perform Elementary Row Operation \$\$R_{2} = R_{2} - (1.47 * R_{1})\$\$\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\\\colorbox{yellow}{0.00}&3.24e+6&-1.47&1.00\\end{bmatrix}\$\$\n'
+      '\\(8. \\)Normalizing leftmost non-zero value of the matrix to make it equal to 1\n'
+      '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\0.00&3.24e+6&-1.47&1.00\\end{bmatrix}\$\$\n'
+      '\\(9. \\)Normalizing \\(Row_{1}\\).<br>Multiply row by \\(4.30e-12\\) to make element at \$\$(Row_{1}, Col_{1})\$\$ into 1\n'
+      '\$\$\\begin{bmatrix}\\colorbox{yellow}{1.00}&0.881&0.00&0.00\\\\0.00&3.24e+6&-1.47&1.00\\end{bmatrix}\$\$\n'
+      '\\(10. \\)Normalizing \\(Row_{2}\\).<br>Multiply row by \\(3.09e-7\\) to make element at \$\$(Row_{2}, Col_{2})\$\$ into 1\n'
+      '\$\$\\begin{bmatrix}1.00&0.881&0.00&0.00\\\\0.00&\\colorbox{yellow}{1.00}&-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
+      '\\(11. \\)Perform Gaussian Elimination on the pivots which is on \$\$(Row_{2}, Col_{2})\$\$\n'
+      '\$\$\\begin{bmatrix}1.00&0.00&4.00e-7&-2.72e-7\\\\0.00&\\colorbox{yellow}{1.00}&-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
+      '\\(12. \\)Perform Gaussian Elimination on the pivots which is on \$\$(Row_{1}, Col_{1})\$\$\n'
+      '\$\$\\begin{bmatrix}\\colorbox{yellow}{1.00}&0.00&4.00e-7&-2.72e-7\\\\0.00&1.00&-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
+      '\\(13. \\)Shift matrix 2 to the right \$\$\\begin{bmatrix}1.00&0.00&4.00e-7&-2.72e-7\\\\0.00&1.00&-4.54e-7&3.09e-7\\end{bmatrix}\$\$ Deleting columns less than 2\n'
+      '\$\$\\begin{bmatrix}4.00e-7&-2.72e-7\\\\-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
+      'Operation Result\n'
+      '\$\$\\begin{bmatrix}4.00e-7&-2.72e-7\\\\-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
     '');
   });
 }
