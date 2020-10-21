@@ -57,7 +57,6 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
     while(number > 0) {
       int last = number % 10;
       result += SUBSCRIPT_CHARCODE[last];
-      print(last);
       number = number ~/ 10;
     }
     return String.fromCharCodes(result.codeUnits.reversed);
@@ -97,6 +96,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
                         if (_formKey.currentState.validate()) {
                           _formKey.currentState.save();
                           print('Saving Matrix ${matrixNameController.text}');
+                          out.updateState();
                           this.widget.callback(out, matrixNameController.text);
                           Navigator.pop(context);
                         }
