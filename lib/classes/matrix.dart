@@ -6,7 +6,6 @@ class Matrix {
   List<String> _historyMessage;
   List<Matrix> _historyState;
   List<Tuple2<int, int>> _historyHighlight;
-  Tuple2<String, String> _historyMessageSymbol = Tuple2(r'$i', r'$j');
   int _stepStart;
   int _stepEnd;
   static const int _historyPrecision = 3;
@@ -19,7 +18,6 @@ class Matrix {
   List<String> get historyMessage => this._historyMessage;
   List<Matrix> get historyState => this._historyState;
   List<Tuple2<int, int>> get historyHighlight => this._historyHighlight;
-  Tuple2<String, String> get historyMessageSymbol => this._historyMessageSymbol;
 
   /// Generate a 0-filled matrix with custom size.
   Matrix.withSize({int row, int col}) {
@@ -275,7 +273,7 @@ class Matrix {
 
   /// Return a new matrix which is the RE (Row Echelon) form of given matrix.
   Matrix getRE() {
-    var out = Matrix.copyFrom(this);
+    Matrix out = Matrix.copyFrom(this);
     out.historyAdd(
       message: 'Getting Row Echelon Form of the matrix',
       state: Matrix.copyFrom(out, copyHistory: false),
