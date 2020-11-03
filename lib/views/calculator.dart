@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import '../classes/matrix.dart';
-import '../form/matrix_operation.dart';
+import '../dialog/matrix_operation.dart';
 import '../operation.dart';
 
 class CalculatorPage extends StatefulWidget {

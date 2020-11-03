@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:matrix_calculator/dialog/matrix_calculate.dart';
+import 'package:matrix_calculator/form/matrix_calculate.dart';
 import '../classes/matrix.dart';
 import '../operation.dart';
-import '../dialog/matrix_latex.dart';
+import 'matrix_latex.dart';
 import '../utils.dart';
 
 class OperationFormView extends StatefulWidget {
@@ -62,7 +62,7 @@ class _OperationFormViewState extends State<OperationFormView> {
                 icon: Icon(matrixOperation.icon),
                 color: matrixOperation.color,
                 tooltip: matrixOperation.operation.fullName,
-                onPressed: () => buildOperationForm(parentContext, matrixOperation, data, precision),
+                onPressed: () => buildOperationDialog(parentContext, matrixOperation, data, precision),
               );
             }),
             backgroundColor: matrixOperation.bgColor,
@@ -72,7 +72,7 @@ class _OperationFormViewState extends State<OperationFormView> {
             title: Text(matrixOperation.operation.shortName),
             subtitle: Text('${matrixOperation.description}'),
             onTap: () => {
-              buildOperationForm(parentContext, matrixOperation, data, precision)
+              buildOperationDialog(parentContext, matrixOperation, data, precision)
             },
           )
         ],
@@ -80,7 +80,7 @@ class _OperationFormViewState extends State<OperationFormView> {
     );
   }
 
-  Future buildOperationForm(BuildContext parentContext, MatrixOperation matrixOperation, Map<String, Matrix> data, int precision) {
+  Future buildOperationDialog(BuildContext parentContext, MatrixOperation matrixOperation, Map<String, Matrix> data, int precision) {
     return showDialog(
         context: parentContext,
         builder: (BuildContext context) {
