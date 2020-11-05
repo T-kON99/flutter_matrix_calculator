@@ -174,7 +174,6 @@ void main() {
       print(e);
       expect(true, true);
     }
-    // expect(mat.det(), throwsException);
   });
 
   test('Reduced Row Echelon Form of a square 2x2 matrix', () {
@@ -223,7 +222,7 @@ void main() {
     ]);
   });
 
-    test('100000 Reduced Row Echelon Form iterations of random 3x6 Matrix extreme floating points', () {
+  test('100000 Reduced Row Echelon Form iterations of random 3x6 Matrix extreme floating points', () {
     Random _random = new Random();
     for(int i = 0; i < 100000; i++) {
       final mat = Matrix(data: [
