@@ -106,7 +106,7 @@ class Matrix {
   //  This method is used to tell to add state update to the matrix if it's edited. This allows for clearer history message.
   void updateState() {
     this.historyAdd(
-      message: 'Matrix edited and updated to size \\(${this._row}\\) \\(\\times\\) \\(${this._col}\\)',
+      message: 'Matrix edited and updated to size \$\$${this._row} \\times ${this._col}\$\$',
       state: Matrix.copyFrom(this, copyHistory: false),
       highlights: Tuple2(null, null)
     );
@@ -157,7 +157,7 @@ class Matrix {
             out._data[i - 1][n] = out._data[i - 1][n] + out._data[i][n];
           }
           out.historyAdd(
-            message: 'Element at \$\$(Row_{$i}, Col_{${j+1}}) = 0\$\$. Perform Elementary Row Operation \$\$Row_{$i} = Row_{$i} + Row_{${i+1}}\$\$',
+            message: 'Element at \\((Row_{$i}, Col_{${j+1}}) = 0\\). Perform Elementary Row Operation \$\$Row_{$i} = Row_{$i} + Row_{${i+1}}\$\$',
             state: Matrix.copyFrom(out, copyHistory: false),
             highlights: Tuple2(i, j + 1),
           );
@@ -645,7 +645,7 @@ class Matrix {
       int rowHighlight = this._historyHighlight[i].item1 == null ? null : this._historyHighlight[i].item1 - 1;
       int colHighlight = this._historyHighlight[i].item2 == null ? null : this._historyHighlight[i].item2 - 1;
       int stepNo = stepsOnly ? i - this._stepStart + 1 : i + 1;
-      result += "\\($stepNo. \\)" + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText(highlightRow: rowHighlight, highlightCol: colHighlight, precision: precision) + '\n';
+      result += "\\($stepNo. \\) " + this._historyMessage[i] + '\n' + this._historyState[i].getMathJexText(highlightRow: rowHighlight, highlightCol: colHighlight, precision: precision) + '\n';
     }
     result += "Operation Result""\n" + this.getMathJexText(precision: precision) + '\n';
     return result;
