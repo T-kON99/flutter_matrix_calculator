@@ -6,7 +6,9 @@ class MatrixLatex extends StatefulWidget {
   final String latexText;
   final String label;
   final List<Widget> actions;
-  const MatrixLatex({Key key, this.label, this.latexText, this.actions}) : super(key: key);
+  // Fix KaTeX brocken bracket when row is bigger than 2.
+  final int matrixRow;
+  const MatrixLatex({Key key, this.label, this.latexText, this.actions, this.matrixRow}) : super(key: key);
   @override
   _MatrixLatexState createState() => _MatrixLatexState();
 }
@@ -24,11 +26,11 @@ class _MatrixLatexState extends State<MatrixLatex> {
             id: "matrix_latex",
             children: [
               TeXViewColumn(children: [
-                TeXViewDocument(this.widget.latexText, style: TeXViewStyle(textAlign: TeXViewTextAlign.Center)),
+                TeXViewDocument(this.widget.latexText, style: TeXViewStyle(textAlign: TeXViewTextAlign.Left)),
               ]),
             ]
           ),
-          renderingEngine: TeXViewRenderingEngine.katex(), // Katex for fast render and MathJax for quality render.
+          renderingEngine: this.widget.matrixRow > 2 ? TeXViewRenderingEngine.mathjax() : TeXViewRenderingEngine.katex(), // Katex for fast render and MathJax for quality render.
           loadingWidgetBuilder: (BuildContext context) => Center(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,

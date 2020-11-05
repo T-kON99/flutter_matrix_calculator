@@ -135,7 +135,8 @@ class _OperationFormViewState extends State<OperationFormView> {
         if (!showSteps)
           return MatrixLatex(
             label: label, 
-            latexText: output, 
+            latexText: output,
+            matrixRow: data[widget.resultMatrixName].row,
             actions: <Widget>[
               FlatButton(
                 child: Text('Save'),
@@ -152,6 +153,7 @@ class _OperationFormViewState extends State<OperationFormView> {
         return MatrixLatex(
           label: label, 
           latexText: result.getHistoryText(stepsOnly: true) + output,
+          matrixRow: data[widget.resultMatrixName].row,
           actions: <Widget>[
             FlatButton(
               child: Text('Save'),

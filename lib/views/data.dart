@@ -93,6 +93,7 @@ class _DataPageState extends State<DataPage> {
                       return MatrixLatex(
                         label: "Matrix $key",
                         latexText: matrixLatexText,
+                        matrixRow: this.widget.data[key].row,
                         actions: <Widget>[
                           FlatButton(
                             child: Text('Close'),
@@ -301,6 +302,7 @@ class _DataPageState extends State<DataPage> {
         return MatrixLatex(
           label: 'History of Matrix $key', 
           latexText: data[key].getHistoryText(),
+          matrixRow: widget.data[key].row,
           actions: <Widget>[
             FlatButton(
               child: Text('Close'),

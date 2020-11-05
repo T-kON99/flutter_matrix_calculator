@@ -212,7 +212,7 @@ class _MatrixAddFormState extends State<MatrixAddForm> {
               tooltip: 'Column ${(index + 1).toString()}',
               label: Text(
                 'Column ${(index + 1).toString()}',
-                textScaleFactor: 1.25,
+                textScaleFactor: 1,
               ));
         })),
         rows: out.data
