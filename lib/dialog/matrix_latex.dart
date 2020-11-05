@@ -47,7 +47,7 @@ class _MatrixLatexState extends State<MatrixLatex> {
             this.setState(() => _height = height);
           },
         ),
-        height: _height + 11,
+        height: _height,
       ),
     );
   }
