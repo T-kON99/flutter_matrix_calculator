@@ -152,7 +152,7 @@ class _OperationFormViewState extends State<OperationFormView> {
           );
         return MatrixLatex(
           label: label, 
-          latexText: result.getHistoryText(stepsOnly: true) + output,
+          latexText: result.getHistoryText(stepsOnly: true, precision: widget.precision) + output,
           matrixRow: data[widget.resultMatrixName].row,
           actions: <Widget>[
             FlatButton(
