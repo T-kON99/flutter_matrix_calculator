@@ -412,7 +412,7 @@ void main() {
       [1, 1],
       [9, 9]
     ]);
-    expect((matA & matB).getHistoryText(),'\\(1. \\)Concatenate Matrix \$\$\\begin{bmatrix}2.00&1.00\\\\1.00&1.00\\\\9.00&9.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}1.00&2.00&3.00\\\\2.00&4.00&1.00\\\\0.00&1.00&2.00\\end{bmatrix}\$\$ To get\n'
+    expect((matA & matB).getHistoryText(),'\\(1. \\) Concatenate Matrix \$\$\\begin{bmatrix}2.00&1.00\\\\1.00&1.00\\\\9.00&9.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}1.00&2.00&3.00\\\\2.00&4.00&1.00\\\\0.00&1.00&2.00\\end{bmatrix}\$\$ To get\n'
       '\$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$\n'
       'Operation Result\n'
       '\$\$\\begin{bmatrix}1.00&2.00&3.00&2.00&1.00\\\\2.00&4.00&1.00&1.00&1.00\\\\0.00&1.00&2.00&9.00&9.00\\end{bmatrix}\$\$\n'
@@ -457,7 +457,7 @@ void main() {
       [1, 2],
       [2, 1]
     ]);
-    expect(mat.shift(length: 1).getHistoryText(), '\\(1. \\)Shift matrix 1 to the right \$\$\\begin{bmatrix}1.00&2.00\\\\2.00&1.00\\end{bmatrix}\$\$ Deleting columns less than 1\n'
+    expect(mat.shift(length: 1).getHistoryText(), '\\(1. \\) Shift matrix 1 to the right \$\$\\begin{bmatrix}1.00&2.00\\\\2.00&1.00\\end{bmatrix}\$\$ Deleting columns less than 1\n'
       '\$\$\\begin{bmatrix}2.00\\\\1.00\\end{bmatrix}\$\$\n'
       'Operation Result\n'
       '\$\$\\begin{bmatrix}2.00\\\\1.00\\end{bmatrix}\$\$\n'
@@ -473,31 +473,31 @@ void main() {
     Matrix b = a * a;
     Matrix c = b.getRRE();
     Matrix d = c + b^4;
-    expect((d.inv()).getHistoryText(stepsOnly: true), '\\(1. \\)Getting inverse of the matrix\n'
+    expect((d.inv()).getHistoryText(stepsOnly: true), '\\(1. \\) Getting inverse of the matrix\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11\\\\3.41e+11&3.01e+11\\end{bmatrix}\$\$\n'
-      '\\(2. \\)Concatenate Matrix \$\$\\begin{bmatrix}1.00&0.00\\\\0.00&1.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}2.32e+11&2.05e+11\\\\3.41e+11&3.01e+11\\end{bmatrix}\$\$ To get\n'
+      '\\(2. \\) Concatenate Matrix \$\$\\begin{bmatrix}1.00&0.00\\\\0.00&1.00\\end{bmatrix}\$\$ With our original Matrix \$\$\\begin{bmatrix}2.32e+11&2.05e+11\\\\3.41e+11&3.01e+11\\end{bmatrix}\$\$ To get\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
-      '\\(3. \\)Getting Reduced Row Echelon Form of the matrix\n'
+      '\\(3. \\) Getting Reduced Row Echelon Form of the matrix\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
-      '\\(4. \\)Getting Row Echelon Form of the matrix\n'
+      '\\(4. \\) Getting Row Echelon Form of the matrix\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
-      '\\(5. \\)Performing Gaussian Elimination on the matrix\n'
+      '\\(5. \\) Performing Gaussian Elimination on the matrix\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\3.41e+11&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
-      '\\(6. \\)Get Ratio of element at \$\$(Row_{2}, Col_{1}) = \\frac{(Row_{2}, Col_{1})}{(Row_{1}, Col_{1})}\$\$\n'
+      '\\(6. \\) Get Ratio of element at \$\$(Row_{2}, Col_{1}) = \\frac{(Row_{2}, Col_{1})}{(Row_{1}, Col_{1})}\$\$\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\\\colorbox{yellow}{3.41e+11}&3.01e+11&0.00&1.00\\end{bmatrix}\$\$\n'
-      '\\(7. \\)Perform Elementary Row Operation \$\$R_{2} = R_{2} - (1.47 * R_{1})\$\$\n'
+      '\\(7. \\) Perform Elementary Row Operation \$\$R_{2} = R_{2} - (1.47 * R_{1})\$\$\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\\\colorbox{yellow}{0.00}&3.24e+6&-1.47&1.00\\end{bmatrix}\$\$\n'
-      '\\(8. \\)Normalizing leftmost non-zero value of the matrix to make it equal to 1\n'
+      '\\(8. \\) Normalizing leftmost non-zero value of the matrix to make it equal to 1\n'
       '\$\$\\begin{bmatrix}2.32e+11&2.05e+11&1.00&0.00\\\\0.00&3.24e+6&-1.47&1.00\\end{bmatrix}\$\$\n'
-      '\\(9. \\)Normalizing \\(Row_{1}\\).<br>Multiply row by \\(4.30e-12\\) to make element at \$\$(Row_{1}, Col_{1})\$\$ into 1\n'
+      '\\(9. \\) Normalizing \\(Row_{1}\\).<br>Multiply row by \\(4.30e-12\\) to make element at \$\$(Row_{1}, Col_{1})\$\$ into 1\n'
       '\$\$\\begin{bmatrix}\\colorbox{yellow}{1.00}&0.881&0.00&0.00\\\\0.00&3.24e+6&-1.47&1.00\\end{bmatrix}\$\$\n'
-      '\\(10. \\)Normalizing \\(Row_{2}\\).<br>Multiply row by \\(3.09e-7\\) to make element at \$\$(Row_{2}, Col_{2})\$\$ into 1\n'
+      '\\(10. \\) Normalizing \\(Row_{2}\\).<br>Multiply row by \\(3.09e-7\\) to make element at \$\$(Row_{2}, Col_{2})\$\$ into 1\n'
       '\$\$\\begin{bmatrix}1.00&0.881&0.00&0.00\\\\0.00&\\colorbox{yellow}{1.00}&-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
-      '\\(11. \\)Perform Gaussian Elimination on the pivots which is on \$\$(Row_{2}, Col_{2})\$\$\n'
+      '\\(11. \\) Perform Gaussian Elimination on the pivots which is on \$\$(Row_{2}, Col_{2})\$\$\n'
       '\$\$\\begin{bmatrix}1.00&0.00&4.00e-7&-2.72e-7\\\\0.00&\\colorbox{yellow}{1.00}&-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
-      '\\(12. \\)Perform Gaussian Elimination on the pivots which is on \$\$(Row_{1}, Col_{1})\$\$\n'
+      '\\(12. \\) Perform Gaussian Elimination on the pivots which is on \$\$(Row_{1}, Col_{1})\$\$\n'
       '\$\$\\begin{bmatrix}\\colorbox{yellow}{1.00}&0.00&4.00e-7&-2.72e-7\\\\0.00&1.00&-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
-      '\\(13. \\)Shift matrix 2 to the right \$\$\\begin{bmatrix}1.00&0.00&4.00e-7&-2.72e-7\\\\0.00&1.00&-4.54e-7&3.09e-7\\end{bmatrix}\$\$ Deleting columns less than 2\n'
+      '\\(13. \\) Shift matrix 2 to the right \$\$\\begin{bmatrix}1.00&0.00&4.00e-7&-2.72e-7\\\\0.00&1.00&-4.54e-7&3.09e-7\\end{bmatrix}\$\$ Deleting columns less than 2\n'
       '\$\$\\begin{bmatrix}4.00e-7&-2.72e-7\\\\-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
       'Operation Result\n'
       '\$\$\\begin{bmatrix}4.00e-7&-2.72e-7\\\\-4.54e-7&3.09e-7\\end{bmatrix}\$\$\n'
