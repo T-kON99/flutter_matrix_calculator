@@ -20,35 +20,41 @@ class _MatrixLatexState extends State<MatrixLatex> {
     return AlertDialog(
       title: Text(widget.label),
       actions: widget.actions,
-      content: Container(
-        child: TeXView(
-          child: TeXViewColumn(
-            id: "matrix_latex",
-            children: [
-              TeXViewColumn(children: [
-                TeXViewDocument(this.widget.latexText, style: TeXViewStyle(textAlign: TeXViewTextAlign.Left)),
-              ]),
-            ]
-          ),
-          renderingEngine: this.widget.matrixRow > 2 ? TeXViewRenderingEngine.mathjax() : TeXViewRenderingEngine.katex(), // Katex for fast render and MathJax for quality render.
-          loadingWidgetBuilder: (BuildContext context) => Center(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                CircularProgressIndicator(),
-                Text("Rendering LaTeX...")
-              ],
+      content: Builder(
+        builder: (BuildContext context) {
+          double width = MediaQuery.of(context).size.width;
+          return Container(
+            child: TeXView(
+              child: TeXViewColumn(
+                id: "matrix_latex",
+                children: [
+                  TeXViewColumn(children: [
+                    TeXViewDocument(this.widget.latexText, style: TeXViewStyle(textAlign: TeXViewTextAlign.Left)),
+                  ]),
+                ]
+              ),
+              renderingEngine: this.widget.matrixRow > 2 ? TeXViewRenderingEngine.mathjax() : TeXViewRenderingEngine.katex(), // Katex for fast render and MathJax for quality render.
+              loadingWidgetBuilder: (BuildContext context) => Center(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    CircularProgressIndicator(),
+                    Text("Rendering LaTeX...")
+                  ],
+                ),
+              ),
+              onRenderFinished: (height) {
+                print("Widget Height is : $height");
+                this.setState(() => _height = height);
+              },
             ),
-          ),
-          onRenderFinished: (height) {
-            print("Widget Height is : $height");
-            this.setState(() => _height = height);
-          },
-        ),
-        height: _height,
-      ),
+            height: _height,
+            width: 0.8 * width,
+          );
+        },
+      )
     );
   }
 }
